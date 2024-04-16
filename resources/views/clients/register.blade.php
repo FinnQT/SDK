@@ -110,7 +110,7 @@
         $(function() {
             $("#form-register").submit(function(e) {
                 e.preventDefault();
-                var formData = $('#form-register').serialize();
+                var formData = $('#form-register').serializ();
                 $.ajax({
                     url: "{{ route('register.post') }}",
                     method: 'POST',
@@ -120,14 +120,14 @@
                         if (res.status == 200) {
                             $('#popup').addClass("open-popup");
                             $('#background-blur').addClass("open-background-blur");
-                            $('#messages-fail').css('display','none');
+                            $('#messages-fail').css('display', 'none');
                         } else {
-                                if(res.messages){
-                                    $('#messages-fail').html(res.messages);
-                                    $('#messages-fail').css('display','block');
-                                }else{
-                                    $('#messages-fail').css('display','none');
-                                    if (res.message.username) {
+                            if (res.messages) {
+                                $('#messages-fail').html(res.messages);
+                                $('#messages-fail').css('display', 'block');
+                            } else {
+                                $('#messages-fail').css('display', 'none');
+                                if (res.message.username) {
                                     $('#username-error').html(res.message.username[0]);
                                 } else {
                                     $('#username-error').empty();
@@ -157,10 +157,9 @@
                                 }
                             }
                         }
-                        
                     }
                 });
             });
-        })
+        });
     </script>
 @endsection

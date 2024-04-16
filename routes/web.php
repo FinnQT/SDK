@@ -38,6 +38,7 @@ Route::prefix('webpay')->group( function(){
   Route::get('/dashboard',[WebPayController::class,'dashboard'])->name('dashboardPay')->middleware('isLoggedInPay');  
   Route::get('/logout',[WebPayController::class,'logout'])->name('logoutPay')->middleware('isLoggedInPay');
   Route::get('/recharge',[WebPayController::class,'recharge'])->name('recharge')->middleware('isLoggedInPay');
+  Route::post('/rechargeCheck',[WebPayController::class,'rechargecheck'])->name('recharge.check');
   Route::post('/recharge',[WebPayController::class,'rechargePost'])->name('recharge.post');
 });
 
