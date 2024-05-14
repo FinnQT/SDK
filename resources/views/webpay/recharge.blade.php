@@ -35,7 +35,7 @@
                     <select id="blank_selection" style="width:100%;">
                         <option value="">Vui lòng chọn loại thẻ</option>
                     </select>
-                    <select name="monney_GATE" id="discount-GATE" style="width:100%; display:none;" onchange="handleSelectMonney()">
+                    <select name="monney_pick" id="droplist_money" style="width:100%; display:none;" onchange="handleSelectMonney()">
                         <option value="">---Chọn mệnh giá---</option>
                         <option value="10000">10,000</option>
                         <option value="20000">20,000</option>
@@ -47,12 +47,6 @@
                         <option value="2000000">2,000,000</option>
                         <option value="5000000">5,000,000</option>
                     </select>
-                    <div id="fill_money" style="display:none;">
-                        <div class="input-group border border-warning rounded-3">
-                            <input type="text" name="monney_Fill" class="form-control bg-light fs-6"
-                                placeholder="Nhập mệnh giá">
-                        </div>
-                    </div>
                 </div>
                 <div id="group-seri-pin">
                     <div class="group-field-alert mb-3">
@@ -72,7 +66,6 @@
                         <div class="input-group border border-warning rounded-3">
                             <input type="text" id="pin" name="pin" class="form-control bg-light fs-6"
                                 placeholder="Nhập mã pin">
-
                         </div>
                         <div id="pin-error" style="color: red"></div>
                     </div>
@@ -165,13 +158,13 @@
                     $('#seri-error').empty();
                     $('#pin-error').empty();
                     $('#messages-fail').css('display', 'none');
-                    document.getElementById("discount-GATE").style.display = "block";
-                    document.getElementById("discount-GATE").value = "";
+                    document.getElementById("droplist_money").style.display = "block";
+                    document.getElementById("droplist_money").value = "";
                     document.getElementById("group-seri-pin").style.display = "block";
                 } else {
                     $('#messages-fail').css('display', 'none');
-                    document.getElementById("discount-GATE").value = "";
-                    document.getElementById("discount-GATE").style.display = "block";
+                    document.getElementById("droplist_money").value = "";
+                    document.getElementById("droplist_money").style.display = "block";
                     document.getElementById("group-seri-pin").style.display = "none";
                 }
             } else {
@@ -179,11 +172,11 @@
                 $('#pin-error').empty();
                 $('#messages-fail').css('display', 'none');
                 document.getElementById("blank_selection").style.display = "block";
-                document.getElementById("discount-GATE").style.display = "none";
+                document.getElementById("droplist_money").style.display = "none";
             }
         }
         function handleSelectMonney(){
-            var selectedValue = document.getElementById("discount-GATE").value;
+            var selectedValue = document.getElementById("droplist_money").value;
             if (selectedValue !== ""){
                 $('#messages-fail').css('display', 'none');
             }
@@ -250,6 +243,7 @@
                         if (res.type_pay == "CardInputGate") {
                             openPopup();
                         } else {
+                            $("#loader").hide();
                             window.location.href = res.result['Data']['RedirectUrl'];
                         }
                     } else {
@@ -263,7 +257,7 @@
         //function validate form add to card-----------------------------------------------------------------
         $(function() {
             $("#form-card").submit(function(e) {
-                e.preventDefault();
+                // e.preventDefault();
                 var formData = $("#form-card").serialize();
                 $.ajax({
                     url: "{{ route('recharge.check') }}",

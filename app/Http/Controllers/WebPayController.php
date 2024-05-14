@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\RequestData;
 use App\Models\RequestMomo;
+use App\Models\RequestBanking;
 use Illuminate\Support\Facades\Validator;
 use App\Models\XMLSerializer;
 use Illuminate\Support\Facades\Log;
@@ -57,13 +58,15 @@ class WebPayController extends Controller
     {
         return view('webpay/history');
     }
-    public function transactionWallet(){
+    public function transactionWallet()
+    {
         if (Session::has('loginUsernamePay')) {
-            $transaction = DB::table('transactions')->where('username', Session::get('loginUsernamePay'))->orderBy('time', 'desc')->limit(10)->get() ;
+            $transaction = DB::table('transactions')->where('username', Session::get('loginUsernamePay'))->orderBy('time', 'desc')->limit(10)->get();
         }
         return view('webpay/transactionWallet', compact('transaction'));
-    } 
-    public function transactionGame(){
+    }
+    public function transactionGame()
+    {
         return view('webpay/transactionGame');
     }
     public function account()
@@ -251,47 +254,49 @@ class WebPayController extends Controller
         $exists = true;
         $uniqueId = "";
         while ($exists) {
-            $uniqueId ="GGO".rand(1, 100000000000); // Sinh một ID ngẫu nhiên trong khoảng từ 1 đến 100000000000
+            $uniqueId = "GGO" . rand(1, 100000000000); // Sinh một ID ngẫu nhiên trong khoảng từ 1 đến 100000000000
             $exists = DB::table('transactions')->where('transactionID', $uniqueId)->exists(); // Kiểm tra xem ID đã tồn tại chưa
         }
-    
         return $uniqueId;
     }
 
-    public function momo_bank($amountInput, $typeMethod, $username)
-    {
-        $rq = new RequestMomo();
-        $rq->merchantId = 3485;
-        $rq->transId = $this->randomtranId();
-        $rq->storeId = 3485;
-        $rq->amount = $amountInput;
-        $rq->payMethod = $typeMethod;
-        $rq->desc = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
-        $rq->title = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
-        $rq->ipnUrl = "http://127.0.0.1:8000/api/recharge/success";
-        $rq->redirectUrl = "https://www.facebook.com/";
-        $rq->failedUrl = "https://www.google.com/";
-        // key
-        $private_key = base_path('app/Http/Controllers/3485.key');
-        $private_key_pass = "f77ee102";
-        $secretkey = "1348a8cd0bfb561841d9ec3654595d21";
-        //signature
-        $OriginalData = sprintf("%d%s%d%d%s%s%s%s%s%s%s", $rq->merchantId, $rq->transId, $rq->storeId, $rq->amount, $rq->payMethod, $rq->desc, $rq->title, $rq->ipnUrl, $rq->redirectUrl, $rq->failedUrl, $secretkey);
-        if (openssl_sign($OriginalData, $Signature, array(file_get_contents($private_key), $private_key_pass))) {
-            $Signature = base64_encode($Signature);
-        }
-        $rq->signature = $Signature;
-        $array = (array) $rq;
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json'
-        ])->post('https://dev-api.gate.vn:17443/billing/payment/web/', $array);
-        if ($response->successful()) {
-            $dataResponse = $response->json();
-            return $dataResponse;
-        } else {
-            return "false";
-        }
-    }
+    // public function momo_bank($amountInput, $typeMethod, $username)
+    // {
+    //     $rq = new RequestMomo();
+    //     $rq->merchantId = 3485;
+    //     $rq->transId = $this->randomtranId();
+    //     $rq->storeId = 3485;
+    //     $rq->amount = $amountInput;
+    //     $rq->payMethod = $typeMethod;
+    //     $rq->desc = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
+    //     $rq->title = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
+    //     $rq->ipnUrl = "http://127.0.0.1:8000/api/recharge/success";
+    //     $rq->redirectUrl = "https://www.facebook.com/";
+    //     $rq->failedUrl = "https://www.google.com/";
+    //     // key
+    //     $private_key = base_path('app/Http/Controllers/3485.key');
+    //     $private_key_pass = "f77ee102";
+    //     $secretkey = "1348a8cd0bfb561841d9ec3654595d21";
+    //     //signature
+    //     $OriginalData = sprintf("%d%s%d%d%s%s%s%s%s%s%s", $rq->merchantId, $rq->transId, $rq->storeId, $rq->amount, $rq->payMethod, $rq->desc, $rq->title, $rq->ipnUrl, $rq->redirectUrl, $rq->failedUrl, $secretkey);
+    //     if (openssl_sign($OriginalData, $Signature, array(file_get_contents($private_key), $private_key_pass))) {
+    //         $Signature = base64_encode($Signature);
+    //     }
+    //     $rq->signature = $Signature;
+    //     $array = (array) $rq;
+    //     $response = Http::withHeaders([
+    //         'Content-Type' => 'application/json'
+    //     ])->post('https://dev-api.gate.vn:17443/billing/payment/web/', $array);
+    //     if ($response->successful()) {
+    //         $dataResponse = $response->json();
+    //         return $dataResponse;
+    //     } else {
+    //         return "false";
+    //     }
+    // }
+
+
+
     // validate form
     public function rechargecheck(Request $request)
     {
@@ -311,7 +316,7 @@ class WebPayController extends Controller
                     'message_validate' => "Vui lòng chọn loại thẻ"
                 ]);
             case 'CardInputGate':
-                if (!$request->monney_GATE) {
+                if (!$request->monney_pick) {
                     return response()->json([
                         "type_pay" => "CardInputGate",
                         'status' => 400,
@@ -333,10 +338,11 @@ class WebPayController extends Controller
                     }
                 }
             default:
-                if (!$request->monney_Fill) {
+                if (!$request->monney_pick) {
                     return response()->json([
+                        "type_pay" => "CardInputGate",
                         'status' => 400,
-                        'message_validate' => "Vui lòng nhập mệnh giá"
+                        'message_validate' => "Vui lòng chọn mệnh giá"
                     ]);
                 } else {
                     return response()->json([
@@ -349,10 +355,10 @@ class WebPayController extends Controller
     // get response from server
     public function rechargePost(Request $request)
     {
-        // dd($request);
+
         switch ($request->type_pay) {
             case 'CardInputGate':
-                $result = $this->CardInput($request->type_pay, $request->monney_GATE, $request->seri, $request->pin);
+                $result = $this->CardInput($request->type_pay, $request->monney_pick, $request->seri, $request->pin);
                 // dd($result);
                 if ($result == "false") {
                     $transactions = DB::table('transactions')->insert([
@@ -360,7 +366,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['PartnerTransactionID'],
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
-                        'ammount' => $request->monney_GATE,
+                        'ammount' => $request->monney_pick,
                         'status' => "Thất bại",
                         'desc' => "lỗi hệ thống"
                     ]);
@@ -375,7 +381,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['PartnerTransactionID'],
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
-                        'ammount' => $request->monney_GATE,
+                        'ammount' => $request->monney_pick,
                         'status' => "Thất bại",
                         'desc' => $result['Description']
                     ]);
@@ -408,39 +414,43 @@ class WebPayController extends Controller
                     ]);
                 }
             case 'Momo':
-                $result = $this->momo_bank($request->monney_Fill, "VIETQR", $request->usernameRq);
-                if ($result == "false") {
-                    return response()->json([
-                        "type_pay" => "Momo",
-                        "status" => 400,
-                        'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
-                    ]);
-                } else if ($result['Code'] != 0) {
-                    return response()->json([
-                        "type_pay" => "Momo",
-                        "status" => 400,
-                        "message_code" => $result['Message']
-                    ]);
-                } else {
-                    return response()->json([
-                        "type_pay" => "Momo",
-                        'status' => 200,
-                        'result' => $result
-                    ]);
-                }
             case 'Bank':
-                $result = $this->momo_bank($request->monney_Fill, "ATMCARD", $request->usernameRq);
-                // dd($result);
+                //ATM and momo - GATE
+                // $result = $this->momo_bank($request->monney_pick, "ATMCARD", $request->usernameRq);
+                // // dd($result);
+                // if ($result == "false") {
+                //     return response()->json([
+                //         "type_pay" => "ATMCARD",
+                //         "status" => 400,
+                //         'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
+                //     ]);
+                // } else if ($result['Code'] != 0) {
+                //     return response()->json([
+                //         "type_pay" => "ATMCARD",
+                //         "status" => 400,
+                //         "message_code" => $result['Message']
+                //     ]);
+                // } else {
+                //     return response()->json([
+                //         "type_pay" => "ATMCARD",
+                //         'status' => 200,
+                //         'result' => $result
+                //     ]);
+                // }
 
+
+                // ATM new
+                $result = $this->banking($request->monney_pick);
+                dd($result);
                 if ($result == "false") {
                     return response()->json([
-                        "type_pay" => "ATMCARD",
+                        "type_pay" => "BANKING",
                         "status" => 400,
                         'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
                     ]);
                 } else if ($result['Code'] != 0) {
                     return response()->json([
-                        "type_pay" => "ATMCARD",
+                        "type_pay" => "BANKING",
                         "status" => 400,
                         "message_code" => $result['Message']
                     ]);
@@ -452,11 +462,28 @@ class WebPayController extends Controller
                     ]);
                 }
             default:
-                break;
         }
     }
-
-
+    public function banking($amountInput)
+    {
+        $rq = new RequestBanking();
+        $rq->username = "VIEIAG1";
+        $rq->password = "9fbonw67kd8qsavy2tge04z1jihp5xur";
+        $rq->request_id = $this->randomtranId();
+        $rq->bank_code = "ACB";
+        $rq->money = $amountInput;
+        $rq->url_callback="https://www.facebook.com/profile.php?id=61557738371056";
+        $array = (array) $rq;
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json'
+        ])->get('http://tg.the247.top/api3/requestPayment', $array);
+        if ($response->successful()) {
+            $dataResponse = $response->json();
+            return $dataResponse;
+        } else {
+            return "false";
+        }
+    }
     public function rechargeSuccess(Request $request)
     {
         return response()->json([
@@ -476,5 +503,4 @@ class WebPayController extends Controller
             'data' => $request->all() // Trả về tất cả dữ liệu từ request
         ]);
     }
-    
 }
