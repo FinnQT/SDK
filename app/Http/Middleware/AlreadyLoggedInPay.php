@@ -16,7 +16,7 @@ class AlreadyLoggedInPay
      */
     public function handle(Request $request, Closure $next)
     {
-        if(Session()->has('loginIdPay') && (url('webpay/login')==$request->url()
+        if(Session()->has('loginUsernamePay') && (url('webpay/login')==$request->url()
          || url('webpay/register')==$request->url()|| url('webpay/forgot')==$request->url())){
             return redirect()->route('dashboardPay');
         }

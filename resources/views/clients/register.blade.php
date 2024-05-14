@@ -88,8 +88,10 @@
             </div>
         </div>
     </div>
+
+    {{-- pop up success --}}
     <div class="container-popup">
-        <div class="backgroud-blur" id="background-blur"></div>
+        <div class="background-blur" id="background-blur"></div>
         <div class="popup" id="popup">
             <img src="{{ asset('assets\clients\image\accept.png') }}" alt="">
             <h2>Thành công</h2>
@@ -107,10 +109,14 @@
             backgroundblur.classList.remove("open-background-blur");
             window.location.href = "{{ route('login') }}";
         }
+        function openPopup() {
+            $('#popup').addClass("open-popup");
+            $('#background-blur').addClass("open-background-blur");
+        }
         $(function() {
             $("#form-register").submit(function(e) {
                 e.preventDefault();
-                var formData = $('#form-register').serializ();
+                var formData = $('#form-register').serialize();
                 $.ajax({
                     url: "{{ route('register.post') }}",
                     method: 'POST',
@@ -118,8 +124,7 @@
                     dataType: 'json',
                     success: function(res) {
                         if (res.status == 200) {
-                            $('#popup').addClass("open-popup");
-                            $('#background-blur').addClass("open-background-blur");
+                            openPopup();
                             $('#messages-fail').css('display', 'none');
                         } else {
                             if (res.messages) {

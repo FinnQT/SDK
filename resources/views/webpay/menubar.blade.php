@@ -8,12 +8,12 @@
         <i class="fa-solid fa-bars"></i>
       </button>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">Trang chủ</a></li>
+        <li><a class="dropdown-item" href="{{ route('dashboardPay') }}">Trang chủ</a></li>
         <li><a class="dropdown-item" href="#">Nạp game</a></li>
         <li><a class="dropdown-item" href="{{ route('recharge')}}">Nạp ví</a></li>
-        <li><a class="dropdown-item" href="#">Tài khoản</a></li>
+        <li><a class="dropdown-item" href="{{ route('account') }}">Tài khoản</a></li>
         <li><a class="dropdown-item" href="#">Tỉ giá</a></li>
-        <li><a class="dropdown-item" href="#">Lịch sử</a></li>
+        <li><a class="dropdown-item" href="{{ route('history') }}">Lịch sử</a></li>
         <li><a class="dropdown-item" href="{{ route('logoutPay')}}">Thoát</a></li>
       </ul>
     </div>

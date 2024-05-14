@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Http;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\RequestData;
-use App\Models\ResponseData;
+use App\Models\RequestMomo;
 use Illuminate\Support\Facades\Validator;
 use App\Models\XMLSerializer;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use nusoap_client;
 
 
@@ -29,11 +32,10 @@ class WebPayController extends Controller
             'username.required' => 'Vui lòng nhập tên tài khoản',
             'password.required' => 'Vui lòng nhập mật khẩu',
         ]);
-
         $user = DB::table('users')->where('username', $request->username)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $request->session()->put('loginIdPay', $user->id);
+                $request->session()->put('loginUsernamePay', $user->username);
                 return redirect()->route('dashboardPay');
             } else {
                 return back()->with('fail', 'Mật khẩu không chính xác');
@@ -45,17 +47,120 @@ class WebPayController extends Controller
 
     public function dashboard()
     {
-        $data1 = array();
-        if (Session::has('loginIdPay')) {
-            $data1 = DB::table('users')->where('id', Session::get('loginIdPay'))->first();
+        $data = array();
+        if (Session::has('loginUsernamePay')) {
+            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
         }
-        return view('webpay/dashboard', compact('data1'));
+        return view('webpay/dashboard', compact('data'));
+    }
+    public function history()
+    {
+        return view('webpay/history');
+    }
+    public function transactionWallet(){
+        if (Session::has('loginUsernamePay')) {
+            $transaction = DB::table('transactions')->where('username', Session::get('loginUsernamePay'))->orderBy('time', 'desc')->limit(10)->get() ;
+        }
+        return view('webpay/transactionWallet', compact('transaction'));
+    } 
+    public function transactionGame(){
+        return view('webpay/transactionGame');
+    }
+    public function account()
+    {
+        $data = array();
+        if (Session::has('loginUsernamePay')) {
+            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+        }
+        return view('webpay/account', compact('data'));
+    }
+    public function updateName(Request $request)
+    {
+
+        if (Session::has('loginUsernamePay')) {
+            if (!$request->detail_name) {
+                $request->detail_name = "";
+            }
+            $affected = DB::table('users')
+                ->where('username', Session::get('loginUsernamePay'))
+                ->update(['name' => $request->detail_name]);
+            if ($affected) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'success'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Nhập tên muốn thay đổi của bạn'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Cập nhật thất bại'
+            ]);
+        }
+    }
+    public function updateLocation(Request $request)
+    {
+        if (Session::has('loginUsernamePay')) {
+            if (!$request->detail_location) {
+                $request->detail_location = "";
+            }
+            $affected = DB::table('users')
+                ->where('username', Session::get('loginUsernamePay'))
+                ->update(['location' => $request->detail_location]);
+            if ($affected) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'success'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Nhập địa chỉ muốn thay đổi của bạn'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Cập nhật thất bại'
+            ]);
+        }
+    }
+    public function updateCCCD(Request $request)
+    {
+        if (Session::has('loginUsernamePay')) {
+            if (!$request->detail_CCCD) {
+                $request->detail_CCCD = "";
+            }
+            $affected = DB::table('users')
+                ->where('username', Session::get('loginUsernamePay'))
+                ->update(['CCCD' => $request->detail_CCCD]);
+            if ($affected) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'success'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Nhập CCCD muốn thay đổi của bạn'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Cập nhật thất bại'
+            ]);
+        }
     }
 
     public function logout()
     {
-        if (Session::has('loginIdPay')) {
-            Session::pull('loginIdPay');
+        if (Session::has('loginUsernamePay')) {
+            Session::pull('loginUsernamePay');
             return redirect()->route('loginPay');
         } else {
             return redirect()->route('loginPay');
@@ -63,7 +168,11 @@ class WebPayController extends Controller
     }
     public function recharge()
     {
-        return view('webpay/recharge');
+        $data = array();
+        if (Session::has('loginUsernamePay')) {
+            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+        }
+        return view('webpay/recharge', compact('data'));
     }
     //connect server with cardinput
     public function CardInput($typePay, $money, $seri, $pin)
@@ -83,7 +192,7 @@ class WebPayController extends Controller
         $rq->CardPIN = $pin;
         $rq->FunctionName = "CardInput";
         $rq->TelcoServiceCode = "10034850002";
-        $rq->PartnerTransactionID = rand(10000000, 110000000);
+        $rq->PartnerTransactionID = $this->randomtranId();
 
         //$private_key = "1253.key";
         //$private_key_pass = "ce709fb4";
@@ -123,12 +232,64 @@ class WebPayController extends Controller
                     'ErrorCode' => isset($values[0]) ? $values[0] : null,
                     'Description' => isset($values[1]) ? $values[1] : null,
                     'TransactionID' => isset($values[2]) ? $values[2] : null,
-                    'PartnerTransactionID' => isset($values[3]) ? $values[4] : null,
+                    'PartnerTransactionID' => $rq->PartnerTransactionID,
                     'CardAmount' => isset($values[4]) ? $values[4] : null,
                     'VendorTransactionID' => isset($values[5]) ? $values[5] : null,
                 ];
                 return $data;
             }
+        }
+    }
+    // test momo bank
+    public function test()
+    {
+        return view('webpay/test');
+
+    }
+    public function randomtranId()
+    {
+        $exists = true;
+        $uniqueId = "";
+        while ($exists) {
+            $uniqueId ="GGO".rand(1, 100000000000); // Sinh một ID ngẫu nhiên trong khoảng từ 1 đến 100000000000
+            $exists = DB::table('transactions')->where('transactionID', $uniqueId)->exists(); // Kiểm tra xem ID đã tồn tại chưa
+        }
+    
+        return $uniqueId;
+    }
+
+    public function momo_bank($amountInput, $typeMethod, $username)
+    {
+        $rq = new RequestMomo();
+        $rq->merchantId = 3485;
+        $rq->transId = $this->randomtranId();
+        $rq->storeId = 3485;
+        $rq->amount = $amountInput;
+        $rq->payMethod = $typeMethod;
+        $rq->desc = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
+        $rq->title = "Thanh toán tiền game " . $typeMethod . " KH - " . $username;
+        $rq->ipnUrl = "http://127.0.0.1:8000/api/recharge/success";
+        $rq->redirectUrl = "https://www.facebook.com/";
+        $rq->failedUrl = "https://www.google.com/";
+        // key
+        $private_key = base_path('app/Http/Controllers/3485.key');
+        $private_key_pass = "f77ee102";
+        $secretkey = "1348a8cd0bfb561841d9ec3654595d21";
+        //signature
+        $OriginalData = sprintf("%d%s%d%d%s%s%s%s%s%s%s", $rq->merchantId, $rq->transId, $rq->storeId, $rq->amount, $rq->payMethod, $rq->desc, $rq->title, $rq->ipnUrl, $rq->redirectUrl, $rq->failedUrl, $secretkey);
+        if (openssl_sign($OriginalData, $Signature, array(file_get_contents($private_key), $private_key_pass))) {
+            $Signature = base64_encode($Signature);
+        }
+        $rq->signature = $Signature;
+        $array = (array) $rq;
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json'
+        ])->post('https://dev-api.gate.vn:17443/billing/payment/web/', $array);
+        if ($response->successful()) {
+            $dataResponse = $response->json();
+            return $dataResponse;
+        } else {
+            return "false";
         }
     }
     // validate form
@@ -152,17 +313,20 @@ class WebPayController extends Controller
             case 'CardInputGate':
                 if (!$request->monney_GATE) {
                     return response()->json([
+                        "type_pay" => "CardInputGate",
                         'status' => 400,
                         'message_validate' => "Vui lòng chọn mệnh giá"
                     ]);
                 } else {
                     if ($validator->fails()) {
                         return response()->json([
+                            "type_pay" => "CardInputGate",
                             'status' => 400,
                             'message' => $validator->getMessageBag()
                         ]);
                     } else {
                         return response()->json([
+                            "type_pay" => "CardInputGate",
                             'status' => 200,
                             'message' => 'success'
                         ]);
@@ -175,111 +339,142 @@ class WebPayController extends Controller
                         'message_validate' => "Vui lòng nhập mệnh giá"
                     ]);
                 } else {
-                    if ($validator->fails()) {
-                        return response()->json([
-                            'status' => 400,
-                            'message' => $validator->getMessageBag()
-                        ]);
-                    } else {
-                        return response()->json([
-                            'status' => 200,
-                            'message' => 'success'
-                        ]);
-                    }
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'success'
+                    ]);
                 }
         }
-
     }
     // get response from server
     public function rechargePost(Request $request)
     {
+        // dd($request);
         switch ($request->type_pay) {
             case 'CardInputGate':
                 $result = $this->CardInput($request->type_pay, $request->monney_GATE, $request->seri, $request->pin);
-                if ($result == "fasle") {
+                // dd($result);
+                if ($result == "false") {
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['PartnerTransactionID'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => $request->seri,
+                        'ammount' => $request->monney_GATE,
+                        'status' => "Thất bại",
+                        'desc' => "lỗi hệ thống"
+                    ]);
                     return response()->json([
+                        "type_pay" => "CardInputGate",
                         "status" => 400,
                         'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
                     ]);
                 } else if ($result['ErrorCode'] != "00") {
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['PartnerTransactionID'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => $request->seri,
+                        'ammount' => $request->monney_GATE,
+                        'status' => "Thất bại",
+                        'desc' => $result['Description']
+                    ]);
                     return response()->json([
+                        "type_pay" => "CardInputGate",
                         "status" => 400,
                         "message_code" => $result['Description']
                     ]);
                 } else {
+                    $amount = $result['CardAmount'] * 80 / 100;
+                    $user = DB::table('users')->where('username', $request->usernameRq)->first();
+                    $monney = $user->balance + $amount;
+                    $affected = DB::table('users')
+                        ->where('username', $request->usernameRq)
+                        ->update(['balance' => $monney]);
+
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['PartnerTransactionID'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => $request->seri,
+                        'ammount' => $result['CardAmount'],
+                        'status' => "Thành công",
+                        'desc' => "Thanh toán tiền thẻ thành công"
+                    ]);
                     return response()->json([
+                        "type_pay" => "CardInputGate",
                         'status' => 200,
                         'result' => $result
                     ]);
                 }
-            case'Momo':
-                break;
-            case'Bank':
-                break;
+            case 'Momo':
+                $result = $this->momo_bank($request->monney_Fill, "VIETQR", $request->usernameRq);
+                if ($result == "false") {
+                    return response()->json([
+                        "type_pay" => "Momo",
+                        "status" => 400,
+                        'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
+                    ]);
+                } else if ($result['Code'] != 0) {
+                    return response()->json([
+                        "type_pay" => "Momo",
+                        "status" => 400,
+                        "message_code" => $result['Message']
+                    ]);
+                } else {
+                    return response()->json([
+                        "type_pay" => "Momo",
+                        'status' => 200,
+                        'result' => $result
+                    ]);
+                }
+            case 'Bank':
+                $result = $this->momo_bank($request->monney_Fill, "ATMCARD", $request->usernameRq);
+                // dd($result);
+
+                if ($result == "false") {
+                    return response()->json([
+                        "type_pay" => "ATMCARD",
+                        "status" => 400,
+                        'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
+                    ]);
+                } else if ($result['Code'] != 0) {
+                    return response()->json([
+                        "type_pay" => "ATMCARD",
+                        "status" => 400,
+                        "message_code" => $result['Message']
+                    ]);
+                } else {
+                    return response()->json([
+                        "type_pay" => "ATMCARD",
+                        'status' => 200,
+                        'result' => $result
+                    ]);
+                }
             default:
                 break;
         }
-
     }
 
 
+    public function rechargeSuccess(Request $request)
+    {
+        return response()->json([
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'data' => $request->all() // Trả về tất cả dữ liệu từ request
+        ]);
 
-
-    // public function rechargePost(Request $request)
-    // {
-
-    //     $validator = Validator::make($request->all(), [
-    //         'seri' => 'required',
-    //         'pin' => 'required'
-
-    //     ], [
-    //         'seri.required' => 'Vui lòng nhập mã pin',
-    //         'pin.required' => 'Vui lòng nhập seri'
-    //     ]);
-
-    //     switch ($request->type_pay) {
-    //         case '':
-    //             return response()->json([
-    //                 'status' => 400,
-    //                 'message_validate' => "Vui lòng chọn loại thẻ"
-    //             ]);
-    //         case 'momo':
-    //             break;
-    //         case 'CardInputGate':
-    //             if (!$request->monney_GATE) {
-    //                 return response()->json([
-    //                     'status' => 400,
-    //                     'message_validate' => "Vui lòng chọn mệnh giá"
-    //                 ]);
-    //             } else {
-    //                 if ($validator->fails()) {
-    //                     return response()->json([
-    //                         'status' => 400,
-    //                         'message' => $validator->getMessageBag()
-    //                     ]);
-    //                 } else {
-    //                     $result = $this->CardInput($request->type_pay, $request->monney_GATE, $request->seri, $request->pin);
-    //                     if ($result == "fasle") {
-    //                         return response()->json([
-    //                             "status" => 400,
-    //                             'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
-    //                         ]);
-    //                     } else if ($result['ErrorCode'] != "00") {
-    //                         return response()->json([
-    //                             "status" => 400,
-    //                             "message_code" => $result['Description']
-    //                         ]);
-    //                     } else {
-
-    //                         return response()->json([
-    //                             'status' => 200,
-    //                             'result' => $result
-    //                         ]);
-    //                     }
-    //                 }
-    //             }
-    //         default:
-    //             break;
-    //     }
-    // }
+    }
+    public function rechargeSuccessview(Request $request)
+    {
+        $data = $request->json()->all();
+        Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
+        return response()->json([
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'data' => $request->all() // Trả về tất cả dữ liệu từ request
+        ]);
+    }
+    
 }

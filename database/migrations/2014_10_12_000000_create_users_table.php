@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('location')->nullable();
             $table->string('CCCD')->nullable();
+            $table->decimal('balance', 13, 2)->default(0.00);
             $table->rememberToken();
             $table->timestamps();
         });

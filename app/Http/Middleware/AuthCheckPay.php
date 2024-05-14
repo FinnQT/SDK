@@ -16,7 +16,7 @@ class AuthCheckPay
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!Session()->has('loginIdPay')){
+        if(!Session()->has('loginUsernamePay')){
             return redirect()->route('loginPay')->with('fail','Bạn phải đăng nhập trước!');
         }
         return $next($request);

@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\RechargeController;
+use App\Http\Controllers\WebPayController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,6 @@ use App\Http\Controllers\Api\RechargeController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::prefix('recharge')->as('recharge')->group(function(){
-    Route::get('/index',[RechargeController::class,'index'])->name('index');
-});
+
+Route::post('/recharge/success',[WebPayController::class,'rechargeSuccessview'])->name('recharge.success');
+

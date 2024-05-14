@@ -16,7 +16,7 @@ class AlreadyLoggedIn
      */
     public function handle(Request $request, Closure $next)
     {
-        if(Session()->has('loginId') && (url('clients/login')==$request->url()
+        if(Session()->has('loginUsername') && (url('clients/login')==$request->url()
          || url('clients/register')==$request->url()|| url('clients/forgot')==$request->url())){
             return redirect()->route('dashboard');
         }

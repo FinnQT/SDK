@@ -26,8 +26,8 @@ Route::prefix('clients')->group( function(){
   Route::get('/logout',[AuthManager::class,'logout'])->name('logout');
   Route::get('/dashboard',[AuthManager::class,'dashboard'])->name('dashboard')->middleware('isLoggedIn');
   Route::get('/forgot',[AuthManager::class,'forgot'])->name('forgot')->middleware('alreadyLoggedIn');
-  Route::post('/forgotvalidate',[AuthManager::class,'forgotPostTest'])->name('forgot.validate');
-  Route::post('/forgotnewpass',[AuthManager::class,'forgotPostNewPassword'])->name('forgot.newpass');
+  Route::post('/forgot/validate',[AuthManager::class,'forgotPostTest'])->name('forgot.validate');
+  Route::post('/forgot/newpass',[AuthManager::class,'forgotPostNewPassword'])->name('forgot.newpass');
 });
 
 
@@ -38,7 +38,29 @@ Route::prefix('webpay')->group( function(){
   Route::get('/dashboard',[WebPayController::class,'dashboard'])->name('dashboardPay')->middleware('isLoggedInPay');  
   Route::get('/logout',[WebPayController::class,'logout'])->name('logoutPay')->middleware('isLoggedInPay');
   Route::get('/recharge',[WebPayController::class,'recharge'])->name('recharge')->middleware('isLoggedInPay');
-  Route::post('/rechargeCheck',[WebPayController::class,'rechargecheck'])->name('recharge.check');
+  Route::post('/recharge/checkValidate',[WebPayController::class,'rechargecheck'])->name('recharge.check');
   Route::post('/recharge',[WebPayController::class,'rechargePost'])->name('recharge.post');
+  Route::get('/history',[WebPayController::class,'history'])->name('history')->middleware('isLoggedInPay');  
+  Route::get('/account',[WebPayController::class,'account'])->name('account')->middleware('isLoggedInPay');  
+
+
+
+ 
+ 
+
+
+  //update info user
+  Route::post('/account/updateName',[WebPayController::class,'updateName'])->name('update.Name');
+  Route::post('/account/updateLocation',[WebPayController::class,'updateLocation'])->name('update.Location');
+  Route::post('/account/updateCCCD',[WebPayController::class,'updateCCCD'])->name('update.CCCD');
+
+
+
+
+
+  Route::get('/napthanhcong',[WebPayController::class,'napthanhcong'])->name('napthanhcong');
+
+  Route::get('/history/transactionWallet',[WebPayController::class,'transactionWallet'])->name('transactionWallet');
+  Route::get('/history/transactionGame',[WebPayController::class,'transactionGame'])->name('transactionGame');
 });
 

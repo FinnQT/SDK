@@ -34,7 +34,7 @@ class AuthManager extends Controller
         $user = DB::table('users')->where('username', $request->username)->first();
         if($user){
             if(Hash::check($request->password,$user->password)){
-                $request->session()->put('loginId',$user->id);
+                $request->session()->put('loginUsername',$user->username);
                 return redirect()->route('dashboard');
             }else{
                 return back()->with('fail','Mật khẩu không chính xác');
@@ -86,13 +86,15 @@ class AuthManager extends Controller
             $password=Hash::make($request->password);
             $protect_code=$request->protect_code;
             $uuid= (string) Uuid::uuid4();
+            $created_at = now(); 
             
             $res=DB::table('users')->insert([
                 'uuid'=>$uuid,
                 'username'=>$username,
                 'email'=>$email,
                 'password'=>$password,
-                'protect_code'=>$protect_code
+                'protect_code'=>$protect_code,
+                'created_at'=> $created_at
         ]);
         if($res){
             // return back()->with('success','Bạn đăng ký thành công');
@@ -113,14 +115,14 @@ class AuthManager extends Controller
     //go to dashboard
     public function dashboard(){
         $data = array();
-        if(Session::has('loginId')){
-            $data = DB::table('users')->where('id', Session::get('loginId'))->first();
+        if(Session::has('loginUsername')){
+            $data = DB::table('users')->where('username', Session::get('loginUsername'))->first();
         }
         return view('clients/dashboard',compact('data'));
     }
     public function logout(){
-        if(Session::has('loginId')){
-            Session::pull('loginId');
+        if(Session::has('loginUsername')){
+            Session::pull('loginUsername');
             return redirect()->route('login');
         }
         return redirect()->route('login');
@@ -208,6 +210,5 @@ class AuthManager extends Controller
                 ]);
             }
         }
-
     }
 }
