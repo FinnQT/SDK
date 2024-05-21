@@ -497,10 +497,7 @@ class WebPayController extends Controller
     {
         $data = $request->json()->all();
         Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
-        return response()->json([
-            'method' => $request->method(),
-            'url' => $request->url(),
-            'data' => $request->all() // Trả về tất cả dữ liệu từ request
-        ]);
+
+        return  view('webpay/testATM', compact('data'));
     }
 }
