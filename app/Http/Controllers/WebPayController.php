@@ -15,10 +15,11 @@ use App\Models\RequestBanking;
 use Illuminate\Support\Facades\Validator;
 use App\Models\XMLSerializer;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 use nusoap_client;
 
 
-class WebPayController extends Controller
+class WebPayController extends Controller 
 {
     public function login()
     {
@@ -61,7 +62,7 @@ class WebPayController extends Controller
     public function transactionWallet()
     {
         if (Session::has('loginUsernamePay')) {
-            $transaction = DB::table('transactions')->where('username', Session::get('loginUsernamePay'))->orderBy('time', 'desc')->limit(10)->get();
+            $transaction = DB::table('transactions')->where('username', Session::get('loginUsernamePay'))->orderBy('time', 'desc')->limit(30)->get();
         }
         return view('webpay/transactionWallet', compact('transaction'));
     }
@@ -367,8 +368,8 @@ class WebPayController extends Controller
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
                         'ammount' => $request->monney_pick,
-                        'status' => "Thất bại",
-                        'desc' => "lỗi hệ thống"
+                        'status' => -1,
+                        'desc' => "Lỗi hệ thống - Giao dịch thất bại"
                     ]);
                     return response()->json([
                         "type_pay" => "CardInputGate",
@@ -382,7 +383,7 @@ class WebPayController extends Controller
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
                         'ammount' => $request->monney_pick,
-                        'status' => "Thất bại",
+                        'status' => -1,
                         'desc' => $result['Description']
                     ]);
                     return response()->json([
@@ -404,8 +405,8 @@ class WebPayController extends Controller
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
                         'ammount' => $result['CardAmount'],
-                        'status' => "Thành công",
-                        'desc' => "Thanh toán tiền thẻ thành công"
+                        'status' => 1,
+                        'desc' => "Giao dịch thẻ thành công"
                     ]);
                     return response()->json([
                         "type_pay" => "CardInputGate",
@@ -414,7 +415,7 @@ class WebPayController extends Controller
                     ]);
                 }
             case 'Momo':
-            case 'Bank':
+            case 'QRCode':
                 //ATM and momo - GATE
                 // $result = $this->momo_bank($request->monney_pick, "ATMCARD", $request->usernameRq);
                 // // dd($result);
@@ -438,25 +439,53 @@ class WebPayController extends Controller
                 //     ]);
                 // }
 
-
                 // ATM new
                 $result = $this->banking($request->monney_pick);
-                dd($result);
+                // dd($result);
                 if ($result == "false") {
                     return response()->json([
-                        "type_pay" => "BANKING",
+                        "type_pay" => "QRCODE",
                         "status" => 400,
                         'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
                     ]);
-                } else if ($result['Code'] != 0) {
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['request_id'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => "",
+                        'ammount' => $request->monney_pick,
+                        'status' => -1,
+                        'desc' => "Lỗi hệ thống - Giao dịch QR thất bại"
+                    ]);
+                } else if ($result['errorCode'] != 1) {
                     return response()->json([
-                        "type_pay" => "BANKING",
+                        "type_pay" => "QRCODE",
                         "status" => 400,
-                        "message_code" => $result['Message']
+                        "message_code" => $result['message']
+                    ]);
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['request_id'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => "",
+                        'ammount' => $request->monney_pick,
+                        'status' => -1,
+                        'desc' => "Giao QR dịch thất bại"
                     ]);
                 } else {
+                    $amount = $request->monney_pick * 80 / 100;
+                    $user = DB::table('users')->where('username', $request->usernameRq)->first();   
+                    $transactions = DB::table('transactions')->insert([
+                        'username' => $request->usernameRq,
+                        'transactionID' => $result['request_id'],
+                        'type_pay' => $request->type_pay,
+                        'serial' => "",
+                        'ammount' =>  $request->monney_pick,
+                        'status' => 0,
+                        'desc' => "Đang xử lý thanh toán"
+                    ]);
                     return response()->json([
-                        "type_pay" => "ATMCARD",
+                        "type_pay" => "QRCODE",
                         'status' => 200,
                         'result' => $result
                     ]);
@@ -469,16 +498,17 @@ class WebPayController extends Controller
         $rq = new RequestBanking();
         $rq->username = "VIEIAG1";
         $rq->password = "9fbonw67kd8qsavy2tge04z1jihp5xur";
-        $rq->request_id = $this->randomtranId();
+        $rq->request_id =  $this->randomtranId();
         $rq->bank_code = "ACB";
         $rq->money = $amountInput;
-        $rq->url_callback="https://www.facebook.com/profile.php?id=61557738371056";
+        $rq->url_callback="http://ggosdk.mobi/api/recharge/success";
         $array = (array) $rq;
         $response = Http::withHeaders([
             'Content-Type' => 'application/json'
         ])->get('http://tg.the247.top/api3/requestPayment', $array);
         if ($response->successful()) {
             $dataResponse = $response->json();
+            $dataResponse['request_id'] = $rq->request_id;
             return $dataResponse;
         } else {
             return "false";
@@ -497,7 +527,10 @@ class WebPayController extends Controller
     {
         $data = $request->json()->all();
         Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
-
-        return  view('webpay/testATM', compact('data'));
+        return response()->json([
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'data' => $request->all() // Trả về tất cả dữ liệu từ request
+        ]);
     }
 }

@@ -43,24 +43,22 @@ Route::prefix('webpay')->group( function(){
   Route::get('/history',[WebPayController::class,'history'])->name('history')->middleware('isLoggedInPay');  
   Route::get('/account',[WebPayController::class,'account'])->name('account')->middleware('isLoggedInPay');  
 
-
-
- 
- 
-
-
   //update info user
   Route::post('/account/updateName',[WebPayController::class,'updateName'])->name('update.Name');
   Route::post('/account/updateLocation',[WebPayController::class,'updateLocation'])->name('update.Location');
   Route::post('/account/updateCCCD',[WebPayController::class,'updateCCCD'])->name('update.CCCD');
 
+  Route::get('/recharge/qrcode',[WebPayController::class,'qrCode'])->name('qrcode');
+  
+  Route::get('/recharge/transactionSuccess/{id}',[WebPayController::class,'transactionSuccess'])->name('transactionSuccess');
+  Route::get('/recharge/timeouts/{id}',[WebPayController::class,'timeouts'])->name('timeouts');
+
+
+  Route::get('/history/transactionWallet',[WebPayController::class,'transactionWallet'])->name('transactionWallet')->middleware('isLoggedInPay');
+  Route::get('/history/transactionGame',[WebPayController::class,'transactionGame'])->name('transactionGame')->middleware('isLoggedInPay');
 
 
 
 
-  Route::get('/napthanhcong',[WebPayController::class,'napthanhcong'])->name('napthanhcong');
-
-  Route::get('/history/transactionWallet',[WebPayController::class,'transactionWallet'])->name('transactionWallet');
-  Route::get('/history/transactionGame',[WebPayController::class,'transactionGame'])->name('transactionGame');
 });
 
