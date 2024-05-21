@@ -20,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/recharge/success',[WebPayController::class,'rechargeSuccessview'])->name('recharge.success');
+Route::get('/recharge/success',[WebPayController::class,'CallBackRechargeSuccess'])->name('recharge.success');
 
