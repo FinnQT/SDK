@@ -443,11 +443,6 @@ class WebPayController extends Controller
                 $result = $this->banking($request->monney_pick);
                 // dd($result);
                 if ($result == "false") {
-                    return response()->json([
-                        "type_pay" => "QRCODE",
-                        "status" => 400,
-                        'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
-                    ]);
                     $transactions = DB::table('transactions')->insert([
                         'username' => $request->usernameRq,
                         'transactionID' => $result['request_id'],
@@ -457,12 +452,13 @@ class WebPayController extends Controller
                         'status' => -1,
                         'desc' => "Lỗi hệ thống - Giao dịch QR thất bại"
                     ]);
-                } else if ($result['errorCode'] != 1) {
                     return response()->json([
                         "type_pay" => "QRCODE",
                         "status" => 400,
-                        "message_code" => $result['message']
+                        'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
                     ]);
+                    
+                } else if ($result['errorCode'] != 1) {
                     $transactions = DB::table('transactions')->insert([
                         'username' => $request->usernameRq,
                         'transactionID' => $result['request_id'],
@@ -472,6 +468,12 @@ class WebPayController extends Controller
                         'status' => -1,
                         'desc' => "Giao QR dịch thất bại"
                     ]);
+                    return response()->json([
+                        "type_pay" => "QRCODE",
+                        "status" => 400,
+                        "message_code" => $result['message']
+                    ]);
+                    
                 } else {
                     $amount = $request->monney_pick * 80 / 100;
                     $user = DB::table('users')->where('username', $request->usernameRq)->first();   
