@@ -523,14 +523,69 @@ class WebPayController extends Controller
         ]);
 
     }
-    public function rechargeSuccessview(Request $request)
-    {
-        $data = $request->json()->all();
-        Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
-        return response()->json([
-            'method' => $request->method(),
-            'url' => $request->url(),
-            'data' => $request->all() // Trả về tất cả dữ liệu từ request
-        ]);
+    public function CallBackRechargeSuccess(Request $request)
+    { 
+        // $data = json_decode(json_encode($request->all()));
+        $data = $request->all();
+        if($data['status']==1){
+            $transaction = DB::table('transactions')->where('transactionID', $data['request_id'])->first();
+            if( $transaction){
+                $data['username'] = $transaction->username;
+                Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
+                $amount = $data['amount'] * 80 / 100;
+                    $user = DB::table('users')->where('username', $transaction->username)->first();
+                    $monney = $user->balance + $amount;
+                    $affected = DB::table('users')
+                        ->where('username', $transaction->username)
+                        ->update(['balance' => $monney]);
+                    $affected2 = DB::table('transactions')
+                    ->where('transactionID', $data['request_id'])
+                    ->update(['status' => 1,
+                              'desc' => "Giao dịch QR thành công"]);
+            }
+        }else{
+            $affected2 = DB::table('transactions')
+            ->where('transactionID', $data['request_id'])
+            ->update(['status' => -1,
+                      'desc' => "Giao dịch QR thất bại"]);
+        }
+    }
+
+    public function qrCode(Request $request){
+        $dataList = json_decode($request->input('dataList'));
+        return view('webpay/qrcode', compact('dataList'));
+    }
+    public function transactionSuccess($transaction_id){
+        $transaction = DB::table('transactions')->where('transactionID', $transaction_id)->first();
+        if($transaction){
+            if($transaction->status==1){
+                return response()->json([
+                    'status' => 200,
+                    'message'=>"Thanh toán QR hoàn tất"
+                ]);
+            } else if($transaction->status==0){
+                return response()->json([
+                    'status' => 202,
+                    'message'=>"Đang xử lý giao dịch"
+                ]);
+            } else{
+                return response()->json([
+                    'status' => 400,
+                    'message'=>"Giao QR dịch thất bại"
+                ]);
+            }
+        }
+    }
+    public function timeouts($transaction_id){
+        $affected = DB::table('transactions')
+                    ->where('transactionID', $transaction_id)
+                    ->update(['status' => -1,
+                              'desc' => "Giao QR dịch thất bại"]);
+        if($affected){
+            return response()->json([
+                'status' => 200,
+                'message'=>"Hết thời gian - Giao dịch QR thất bại"
+            ]);
+        }
     }
 }
