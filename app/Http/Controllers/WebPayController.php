@@ -367,7 +367,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['PartnerTransactionID'],
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
-                        'ammount' => $request->monney_pick,
+                        'amount' => $request->monney_pick,
                         'status' => -1,
                         'desc' => "Lỗi hệ thống - Giao dịch thất bại"
                     ]);
@@ -382,7 +382,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['PartnerTransactionID'],
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
-                        'ammount' => $request->monney_pick,
+                        'amount' => $request->monney_pick,
                         'status' => -1,
                         'desc' => $result['Description']
                     ]);
@@ -404,7 +404,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['PartnerTransactionID'],
                         'type_pay' => $request->type_pay,
                         'serial' => $request->seri,
-                        'ammount' => $result['CardAmount'],
+                        'amount' => $result['CardAmount'],
                         'status' => 1,
                         'desc' => "Giao dịch thẻ thành công"
                     ]);
@@ -447,7 +447,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['request_id'],
                         'type_pay' => $request->type_pay,
                         'serial' => "",
-                        'ammount' => $request->monney_pick,
+                        'amount' => $request->monney_pick,
                         'status' => -1,
                         'desc' => "Lỗi hệ thống - Giao dịch QR thất bại"
                     ]);
@@ -463,7 +463,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['request_id'],
                         'type_pay' => $request->type_pay,
                         'serial' => "",
-                        'ammount' => $request->monney_pick,
+                        'amount' => $request->monney_pick,
                         'status' => -1,
                         'desc' => "Giao QR dịch thất bại"
                     ]);
@@ -481,7 +481,7 @@ class WebPayController extends Controller
                         'transactionID' => $result['request_id'],
                         'type_pay' => $request->type_pay,
                         'serial' => "",
-                        'ammount' =>  $request->monney_pick,
+                        'amount' =>  $request->monney_pick,
                         'status' => 0,
                         'desc' => "Đang xử lý thanh toán"
                     ]);
@@ -542,7 +542,9 @@ class WebPayController extends Controller
                     $affected2 = DB::table('transactions')
                     ->where('transactionID', $data['request_id'])
                     ->update(['status' => 1,
-                              'desc' => "Giao dịch QR thành công"]);
+                              'desc' => "Giao dịch QR thành công",
+                              'amount'=>$data['amount']
+                            ]);
             }
         }else{
             $affected2 = DB::table('transactions')

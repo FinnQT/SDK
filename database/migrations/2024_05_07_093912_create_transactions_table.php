@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('transactionID')->unique(); // mã giao dịch
             $table->string('type_pay');
             $table->string('serial')->nullable();
-            $table->decimal('ammount', 20, 2);
+            $table->decimal('amount', 20, 2);
             $table->string('status');
             $table->text('desc')->nullable();
             $table->timestamp('time')->useCurrent();
