@@ -17,7 +17,12 @@ use App\Http\Controllers\WebPayController;
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('template_custome', function () {
+  return view('register_layout');
+});
+Route::get('admin', function () {
+  return view('admin/admin');
+});
 Route::prefix('clients')->group( function(){
   Route::get('/login',[AuthManager::class,'login'])->name('login')->middleware('alreadyLoggedIn');
   Route::post('/login',[AuthManager::class,'loginPost'])->name('login.post');
@@ -28,6 +33,7 @@ Route::prefix('clients')->group( function(){
   Route::get('/forgot',[AuthManager::class,'forgot'])->name('forgot')->middleware('alreadyLoggedIn');
   Route::post('/forgot/validate',[AuthManager::class,'forgotPostTest'])->name('forgot.validate');
   Route::post('/forgot/newpass',[AuthManager::class,'forgotPostNewPassword'])->name('forgot.newpass');
+ 
 });
 
 

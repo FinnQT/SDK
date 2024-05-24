@@ -414,7 +414,6 @@ class WebPayController extends Controller
                         'result' => $result
                     ]);
                 }
-            case 'Momo':
             case 'QRCode':
                 //ATM and momo - GATE
                 // $result = $this->momo_bank($request->monney_pick, "ATMCARD", $request->usernameRq);

@@ -4,9 +4,8 @@
 @endsection
 @section('link')
 @endsection
+@section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
 @section('content')
-    @include('webpay/menubar')
-    @include('webpay/bannerslide')
     <div class="container">
       <div class="transactionGame text-center row d-flex justify-content-center align-items-center">
         <div  class="col-md-4">

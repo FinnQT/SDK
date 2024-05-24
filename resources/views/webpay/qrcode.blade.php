@@ -1,4 +1,4 @@
-@extends('webpay/layout')
+@extends('layout')
 @section('title')
     Dasboard
 @endsection
@@ -6,10 +6,9 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 @endsection
 @section('content')
-    @include('webpay/menubar')
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center ">
-            <div class="col-md-4 p-3 shadow-sm" style="margin-top: 20px;" >
+            <div class="col-md-5 p-3 shadow-sm" style="margin-top: 20px;" >
             <div class="text-center">
             <h3 >NẠP THẺ QR</h2>
                <div id="countdown" style="color:red;"></div>
@@ -37,7 +36,6 @@
         </div>
     </div>
 @endsection
-
 @section('script')
 <script>
         const url = '{{ $dataList !== null ? $dataList->redirectLink : ''}}';
