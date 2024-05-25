@@ -37,7 +37,7 @@
                                                 <td>{{ $transaction->transactionID }}</td>
                                                 <td>{{ $transaction->type_pay }}</td>
                                                 <td>{{ $transaction->serial }}</td>
-                                                <td>{{ $transaction->ammount }}</td>
+                                                <td>{{ $transaction->amount }}</td>
                                                 <td> {{ $transaction->status == 1 ? 'Thành công' : ($transaction->status == 0 ? 'Đang xử lý' : 'Thất bại') }}
                                                 </td>
                                                 <td>{{ $transaction->desc }}</td>
