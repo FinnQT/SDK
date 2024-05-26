@@ -1,4 +1,4 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="min-height: 130vh;">
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="../../index3.html" class="brand-link">
         <img src="{{ asset('assets\clients\image\logo-ggo.png') }}" alt="AdminLTE Logo"
@@ -58,7 +58,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route("exchange_rate") }}" class="nav-link">
                         <i class="nav-icon fas fa-coins"></i>
                         <p>
                             Tỉ Giá

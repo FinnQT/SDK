@@ -3,10 +3,7 @@
     recharge
 @endsection
 @section('link')
-    <link rel="stylesheet" href="{{ asset('assets\clients\popupCharge.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets\clients\popupError.css') }}">
     <link rel="stylesheet" href="{{ asset('assets\clients\loader.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets\clients\popup.css') }}">
 @endsection
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
 @section('content')
@@ -60,32 +57,33 @@
                                                             <option value="500000">500,000</option>
                                                             <option value="1000000">1,000,000</option>
                                                             <option value="2000000">2,000,000</option>
+                                                            <option value="3000000">3,000,000</option>
                                                             <option value="5000000">5,000,000</option>
                                                         </select>
                                                     </div>
                                                 </td>
                                             </tr>
-                              
-                                                <tr>
-                                                    <th>Seri</th>
-                                                    <td>
-                                                        <div class="group-field-alert mb-3">
-                                                            <input type="text" class="form-control"
-                                                                placeholder="Nhập mã seri" id="seri" name="seri">
-                                                            <div id="seri-error" style="color: red"></div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Pin</th>
-                                                    <td>
-                                                        <div class="group-field-alert mb-3">
-                                                            <input type="text" id="pin" name="pin"
-                                                                class="form-control" placeholder="Nhập mã pin">
-                                                            <div id="pin-error" style="color: red"></div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+
+                                            <tr>
+                                                <th>Seri</th>
+                                                <td>
+                                                    <div class="group-field-alert mb-3">
+                                                        <input type="text" class="form-control"
+                                                            placeholder="Nhập mã seri" id="seri" name="seri">
+                                                        <div id="seri-error" style="color: red"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Pin</th>
+                                                <td>
+                                                    <div class="group-field-alert mb-3">
+                                                        <input type="text" id="pin" name="pin"
+                                                            class="form-control" placeholder="Nhập mã pin">
+                                                        <div id="pin-error" style="color: red"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -101,74 +99,123 @@
                     <!-- /.col -->
                 </div>
 
+                <!--pop up confirm-->
+                <div class="modal fade" id="popupconfirm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-primary"><b>XÁC NHẬN NẠP THẺ</b></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card">
+                                    <!-- /.card-header -->
+                                    <div class="card-body p-0">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Thẻ</th>
+                                                    <td id="popup_type_pay"></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Serial</th>
+                                                    <td id="popup_seri"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Pin</th>
+                                                    <td id="popup_pin"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                            <div class="text-center text-danger pl-3 pr-3">
+                                <p><b>MUỘI SẼ KHÔNG HOÀN TRẢ NẾU THÔNG TIN CỦA HUYNH KHÔNG CHÍNH XÁC</b></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-primary" onclick="confirm()">Xác Nhận</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- loader --}}
                 <div id="loader" class="loader-overlay" style="display: none">
                     <div class="loader-circle"></div>
                 </div>
-
-                {{-- popup comfirm --}}
-                <div class="overlay" id="overlay">
-                    <div class="confirm-box">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>Xác nhận nạp thẻ</div>
-                            <span class="close" onclick="closeBox()">&times;<span>
-                        </div>
-                        <div class="line" style="width: 100%;height: 1px;background-color: #969292;"></div>
-                        <table>
-                            <th>Thẻ:</th>
-                            <td id="popup_type_pay"></td>
-                            </tr>
-                            <tr>
-                                <th>Serial:</th>
-                                <td id="popup_seri"></td>
-                            </tr>
-                            <tr>
-                                <th>Mã thẻ:</th>
-                                <td id="popup_pin"></td>
-                            </tr>
-                        </table>
-                        <h5>MUỘI SẼ KHÔNG HOÀN TRẢ <br>
-                            NẾU THÔNG TIN CỦA HUYNH KHÔNG CHÍNH XÁC
-                        </h5>
-                        <div class="line" style="width: 100%;height: 1px;background-color: #969292;"></div>
-                        <div class="buttons">
-                            <button onclick="cancel()">Hủy</button>
-                            <button class="btn-confirm" onclick="confirm()">Xác nhận</button>
+                <!-- pupup error -->
+                <div class="modal fade" id="errorpopup" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-danger"><b>LỖI THÔNG TIN THẺ</b></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card">
+                                    <!-- /.card-header -->
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <tr>
+                                                <th id="error_details" class="text-center">hahah</th>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">OKE</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- popup error --}}
-                <div class="error_popup" id="error_popup">
-                    <div class="error_popup_box">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div style="color: red;">Lỗi thông tin thẻ </div>
-                            <span class="close_error" onclick="closeErrorBox()">&times;<span>
-                        </div>
-                        <div class="line" style="width: 100%;height: 1px;background-color: #969292;"></div>
-                        <p id="error_details">mã thẻ lỗi</p>
-                        <div class="line" style="width: 100%;height: 1px;background-color: #969292;"></div>
-                        <div class="buttons">
-                            <button class="btn_confirm_error" onclick="confirm_error()">OK</button>
-                        </div>
-                    </div>
-                </div>
                 {{-- popup success --}}
-                <div class="container-popup">
-                    <div class="background-blur" id="background-blur"></div>
-                    <div class="popup" id="popup">
-                        <img src="{{ asset('assets\clients\image\accept.png') }}" alt="">
-                        <h2>Thành công</h2>
-                        <p>Bạn đã nạp thành công, quay lại ví!!</p>
-                        <button onclick="closePopup()" class="">oke</button>
+                <div class="modal fade" id="successpopup" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 style="color: #28a745;"><b>THÀNH CÔNG</b></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card">
+                                    <!-- /.card-header -->
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <tr>
+                                                <th id="error_details" class="text-center">Than toán thẻ thành công - quay lại ví</th>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" onclick="closeSuccessPopup()">OKE</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
             <!-- /.container-fluid -->
         </div>
         <!-- /.content -->
     </div>
-
 @endsection
 @section('script')
     <script>
@@ -184,17 +231,17 @@
                     document.getElementById("droplist_money").style.display = "block";
                     document.getElementById("droplist_money").value = "";
                     document.getElementById("seri").style.pointerEvents = "auto";
-                    document.getElementById("seri").style.opacity  = "1";
+                    document.getElementById("seri").style.opacity = "1";
                     document.getElementById("pin").style.pointerEvents = "auto";
-                    document.getElementById("pin").style.opacity  = "1";
+                    document.getElementById("pin").style.opacity = "1";
                 } else {
                     $('#messages-fail').css('display', 'none');
                     document.getElementById("droplist_money").value = "";
                     document.getElementById("droplist_money").style.display = "block";
-                    document.getElementById("seri").style.pointerEvents ='none';
-                    document.getElementById("seri").style.opacity  ='0.2';
-                    document.getElementById("pin").style.pointerEvents ='none';
-                    document.getElementById("pin").style.opacity ='0.2';
+                    document.getElementById("seri").style.pointerEvents = 'none';
+                    document.getElementById("seri").style.opacity = '0.2';
+                    document.getElementById("pin").style.pointerEvents = 'none';
+                    document.getElementById("pin").style.opacity = '0.2';
                 }
             } else {
                 $('#seri-error').empty();
@@ -204,42 +251,29 @@
                 document.getElementById("droplist_money").style.display = "none";
             }
         }
-
         function handleSelectMonney() {
             var selectedValue = document.getElementById("droplist_money").value;
             if (selectedValue !== "") {
                 $('#messages-fail').css('display', 'none');
             }
         }
+
         //error popup
         function openErrorBox(error) {
-            document.getElementById("error_popup").style.display = "block";
             document.getElementById("error_details").textContent = error;
+            $('#errorpopup').modal('show');
         }
 
-        function closeErrorBox() {
-            document.getElementById("error_popup").style.display = "none";
-        }
-
-        function confirm_error() {
-            closeErrorBox();
-        }
         // pop up success
-        function closePopup() {
-            let popup = document.getElementById("popup");
-            let backgroundblur = document.getElementById("background-blur");
-            popup.classList.remove("open-popup");
-            backgroundblur.classList.remove("open-background-blur");
+        function closeSuccessPopup() {
             window.location.href = "{{ route('dashboardPay') }}";
         }
-
-        function openPopup() {
-            $('#popup').addClass("open-popup");
-            $('#background-blur').addClass("open-background-blur");
+        function openSuccessPopup() {
+            $('#successpopup').modal('show');
         }
+
         // Popup confirm form----------------------------------------------------------------------
         function openBox() {
-            document.getElementById("overlay").style.display = "block";
             const type_pay = document.getElementById("type-pay");
             const selectedOptionName = type_pay.options[type_pay.selectedIndex].text;
             document.getElementById("popup_type_pay").innerText = selectedOptionName;
@@ -247,19 +281,15 @@
             document.getElementById("popup_seri").innerText = seri.value;
             const pin = document.getElementById("pin");
             document.getElementById("popup_pin").innerText = pin.value;
-            document.getElementById("overlay").style.display = "block";
+            $('#popupconfirm').modal('show');
         }
 
         function closeBox() {
-            document.getElementById("overlay").style.display = "none";
+            $('#popupconfirm').modal('hide');
         }
-
-        function cancel() {
-            closeBox();
-        }
-
         //confirm payment
         function confirm() {
+            closeBox();
             var formData = $("#form-card").serialize();
             $("#loader").show();
             $.ajax({
@@ -271,7 +301,7 @@
                     if (res.status == 200) {
                         $("#loader").hide();
                         if (res.type_pay == "CardInputGate") {
-                            openPopup();
+                            openSuccessPopup();
                         } else if (res.type_pay == "QRCODE") {
                             $("#loader").hide();
                             var dataRes = res.result;

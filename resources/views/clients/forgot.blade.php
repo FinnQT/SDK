@@ -13,8 +13,10 @@
         </div>
         <div class="card pt-4 shadow rounded p-1">
             <p class="login-box-msg"><b>NHẬP THÔNG TIN CẦN THIẾT</b></p>
-            <div class="alert alert-danger" id="messages-fail" style="display: none; margin-left: 20px; margin-right: 20px;"></div>
-            <div class="alert alert-success" id="messages-sucess" style="display: none; margin-left: 20px; margin-right: 20px;"></div>
+            <div class="alert alert-danger" id="messages-fail" style="display: none; margin-left: 20px; margin-right: 20px;">
+            </div>
+            <div class="alert alert-success" id="messages-sucess"
+                style="display: none; margin-left: 20px; margin-right: 20px;"></div>
             <form id="form-validate" action="{{ route('forgot.validate') }}" method="post">
                 <div class="card-body login-card-body" id="card1">
                     <div class="mb-3">
@@ -80,24 +82,44 @@
     </div>
 
     </div>
-    <div class="container-popup">
-        <div class="background-blur" id="background-blur"></div>
-        <div class="popup" id="popup">
-            <img src="{{ asset('assets\clients\image\accept.png') }}" alt="">
-            <h2>Thành công</h2>
-            <p>Bạn đổi mật khẩu thành công, quay lại trang đăng nhập!!</p>
-            <button onclick="closePopup()" class="">oke</button>
+    <div class="modal fade" id="successpopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 style="color: #28a745;"><b>THÀNH CÔNG</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-body p-0">
+                            <table class="table">
+                                <tr>
+                                    <th id="error_details" class="text-center">Đổi mật khẩu thành công - Quay về đăng
+                                        nhập</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="closeSuccessPopup()">OKE</button>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
 @section('script')
     <script>
-        function closePopup() {
-            let popup = document.getElementById("popup");
-            let backgroundblur = document.getElementById("background-blur");
-            popup.classList.remove("open-popup");
-            backgroundblur.classList.remove("open-background-blur");
+        function closeSuccessPopup() {
             window.location.href = "{{ route('login') }}";
+        }
+        function openSuccessPopup() {
+            $('#successpopup').modal('show');
         }
         $(function() {
             $("#form-validate").submit(function(e) {
@@ -164,11 +186,10 @@
                     dataType: 'json',
                     success: function(res) {
                         if (res.status == 200) {
-                            $('#popup').addClass("open-popup");
-                            $('#background-blur').addClass("open-background-blur");
                             $('#messages-fail').css('display', 'none');
                             $('#password-error').empty();
                             $('#cpassword-error').empty();
+                            openSuccessPopup();
 
                         } else {
                             $('#messages-sucess').css('display', 'none');

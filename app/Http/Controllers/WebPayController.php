@@ -78,6 +78,13 @@ class WebPayController extends Controller
         }
         return view('webpay/account', compact('data'));
     }
+    public function exchange_rate(){
+        $data = array();
+        $data = DB::table('exchange_rate')->get()->first();
+        // dd( $data );
+        return view('webpay/exchangerate', compact('data'));
+
+    }
     public function updateName(Request $request)
     {
 
