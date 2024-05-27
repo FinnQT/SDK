@@ -21,7 +21,7 @@
 <body class="@yield('body-class', '')">
     <div class="wrapper">
         @include('webpay/navbar')
-        @include('webpay/sidebar')
+        @include('webpay/sidebar', ['loginUsername' =>View::getSection('loginUsername')])
         @yield('content')
     </div>
 

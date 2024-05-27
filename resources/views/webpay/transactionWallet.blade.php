@@ -5,6 +5,9 @@
 @section('link')
 @endsection
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
+@section('loginUsername')
+    {{ Session::get('loginUsernamePay') }}
+@endsection
 @section('content')
     <div class="content-wrapper">
         <section class="content">
@@ -13,7 +16,7 @@
                     <div class="col-md-10 mt-5">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Lịch sử giao dịch -  30 giao dịch gần nhất</h3>
+                                <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>LỊCH SỬ NẠP VÍ -  30 GIAO DỊCH GẦN NHẤT</b></h3>
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body table-responsive p-0" style="height: 400px;">

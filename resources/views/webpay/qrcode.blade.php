@@ -3,25 +3,25 @@
     Dasboard
 @endsection
 @section('link')
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 @endsection
 @section('content')
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center ">
-            <div class="col-md-5 p-3 shadow-sm" style="margin-top: 20px;" >
-            <div class="text-center">
-            <h3 >NẠP THẺ QR</h2>
-               <div id="countdown" style="color:red;"></div>
-            </div>
-               <img src="{{ $dataList !== null ? $dataList->redirectLink : ''}}" alt="" class="img-fluid">
-               <table class="table ">
+            <div class="col-md-5 p-3 shadow-sm" style="margin-top: 20px;">
+                <div class="text-center">
+                    <h3>NẠP THẺ QR</h2>
+                        <div id="countdown" style="color:red;"></div>
+                </div>
+                <img src="{{ $dataList !== null ? $dataList->redirectLink : '' }}" alt="" class="img-fluid">
+                <table class="table ">
                     <tr>
                         <th>NGƯỜI NHẬN</th>
-                        <td>{{ $dataList !== null ? $dataList->bankname : ''}}</td>
+                        <td>{{ $dataList !== null ? $dataList->bankname : '' }}</td>
                     </tr>
                     <tr>
                         <th>NỘI DUNG CHUYỂN TIỀN</th>
-                        <td>{{ $dataList !== null ? $dataList->content : ''}}</td>
+                        <td>{{ $dataList !== null ? $dataList->content : '' }}</td>
                     </tr>
                     <tr>
                         <th>SỐ TIỀN</th>
@@ -32,13 +32,14 @@
                     </tr>
                 </table>
                 <div> </div>
-            </div> 
+            </div>
         </div>
     </div>
+
 @endsection
 @section('script')
-<script>
-        const url = '{{ $dataList !== null ? $dataList->redirectLink : ''}}';
+    <script>
+        const url = '{{ $dataList !== null ? $dataList->redirectLink : '' }}';
         const urlParams = new URLSearchParams(new URL(url).search);
         const amount = urlParams.get('amount');
         var amount_display = document.getElementById("amount");
@@ -70,28 +71,28 @@
                 // Hiển thị thông báo khi hết thời gian
                 countdownElement.innerHTML = "Hết thời gian!";
                 // lưu giao dịch thấy bại khi hết thời gian
-                var transaction_id = "{{$dataList->request_id}}"
-                url_check ="{{ route('timeouts',['id'=>':id']) }}";
-                url_check = url_check.replace(':id', transaction_id); 
+                var transaction_id = "{{ $dataList->request_id }}"
+                url_check = "{{ route('timeouts', ['id' => ':id']) }}";
+                url_check = url_check.replace(':id', transaction_id);
                 $.ajax({
-                url: url_check,
-                method: 'GET',
-                dataType: 'json',
-                success: function(res) {
-                    if (res.status == 200) {
-                        alert(res.message);
+                    url: url_check,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status == 200) {
+                            alert(res.message);
                         }
                     }
                 });
                 isCountingDown = false;
-                window.location.href = "{{route("loginPay")}}";
+                window.location.href = "{{ route('loginPay') }}";
             }
         }, 1000); // Cập nhật mỗi giây
 
-        var checksuccessbanking =  setInterval(function() {
-            var transaction_id = "{{$dataList->request_id}}"
-            url_check ="{{ route('transactionSuccess',['id'=>':id']) }}";
-            url_check = url_check.replace(':id', transaction_id); 
+        var checksuccessbanking = setInterval(function() {
+            var transaction_id = "{{ $dataList->request_id }}"
+            url_check = "{{ route('transactionSuccess', ['id' => ':id']) }}";
+            url_check = url_check.replace(':id', transaction_id);
             $.ajax({
                 url: url_check,
                 method: 'GET',
@@ -101,31 +102,31 @@
                         clearInterval(countdownInterval);
                         clearInterval(checksuccessbanking);
                         alert(res.message);
-                        window.location.href = "{{route("loginPay")}}";
-                        } else if(res.status == 202) {
-                        }else{
+                        window.location.href = "{{ route('loginPay') }}";
+                    } else if (res.status == 202) {} else {
                         clearInterval(countdownInterval);
                         clearInterval(checksuccessbanking);
                         alert(res.message);
-                        window.location.href = "{{route("loginPay")}}";
-                        }
+                        window.location.href = "{{ route('loginPay') }}";
                     }
-                });
-        },3000);
-        window.addEventListener('unload', function () {
+                }
+            });
+        }, 3000);
+
+
+        window.addEventListener('unload', function() {
             if (isCountingDown) {
                 clearInterval(countdownInterval);
                 clearInterval(checksuccessbanking);
-                var transaction_id = "{{$dataList->request_id}}"
-                url_check ="{{ route('timeouts',['id'=>':id']) }}";
-                url_check = url_check.replace(':id', transaction_id); 
+                var transaction_id = "{{ $dataList->request_id }}"
+                url_check = "{{ route('timeouts', ['id' => ':id']) }}";
+                url_check = url_check.replace(':id', transaction_id);
                 $.ajax({
-                url: url_check,
-                method: 'GET',
-                dataType: 'json',
-                success: function(res) {
-                    if (res.status == 200) {
-                        }
+                    url: url_check,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status == 200) {}
                     }
                 });
             }

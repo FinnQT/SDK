@@ -19,7 +19,7 @@ use Illuminate\Support\ServiceProvider;
 use nusoap_client;
 
 
-class WebPayController extends Controller 
+class WebPayController extends Controller
 {
     public function login()
     {
@@ -57,7 +57,11 @@ class WebPayController extends Controller
     }
     public function history()
     {
-        return view('webpay/history');
+        $data = array();
+        if (Session::has('loginUsernamePay')) {
+            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+        }
+        return view('webpay/history', compact('data'));
     }
     public function transactionWallet()
     {
@@ -78,96 +82,53 @@ class WebPayController extends Controller
         }
         return view('webpay/account', compact('data'));
     }
-    public function exchange_rate(){
+    public function exchange_rate()
+    {
         $data = array();
         $data = DB::table('exchange_rate')->get()->first();
         // dd( $data );
         return view('webpay/exchangerate', compact('data'));
 
     }
-    public function updateName(Request $request)
+    public function updateInfo(Request $request)
     {
+        if (Session::has('loginUsernamePay')) {
+            $affected = DB::table('users')
+                ->where('username', Session::get('loginUsernamePay'))
+                ->update([
+                    'name' => $request->detail_name,
+                    'location' => $request->detail_location,
+                    'CCCD' => $request->detail_CCCD
+                ]);
+            return response()->json([
+                'status' => 200,
+                'message' => 'success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Cập nhật thất bại'
+            ]);
+        }
 
-        if (Session::has('loginUsernamePay')) {
-            if (!$request->detail_name) {
-                $request->detail_name = "";
-            }
-            $affected = DB::table('users')
-                ->where('username', Session::get('loginUsernamePay'))
-                ->update(['name' => $request->detail_name]);
-            if ($affected) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'success'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Nhập tên muốn thay đổi của bạn'
-                ]);
-            }
-        } else {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Cập nhật thất bại'
-            ]);
-        }
+        //     if ($affected) {
+        //         return response()->json([
+        //             'status' => 200,
+        //             'message' => 'success'
+        //         ]);
+        //     } else {
+        //         return response()->json([
+        //             'status' => 400,
+        //             'message' => 'Nhập tên muốn thay đổi của bạn'
+        //         ]);
+        //     }
+        // } else {
+        //     return response()->json([
+        //         'status' => 400,
+        //         'message' => 'Cập nhật thất bại'
+        //     ]);
+        // }
     }
-    public function updateLocation(Request $request)
-    {
-        if (Session::has('loginUsernamePay')) {
-            if (!$request->detail_location) {
-                $request->detail_location = "";
-            }
-            $affected = DB::table('users')
-                ->where('username', Session::get('loginUsernamePay'))
-                ->update(['location' => $request->detail_location]);
-            if ($affected) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'success'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Nhập địa chỉ muốn thay đổi của bạn'
-                ]);
-            }
-        } else {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Cập nhật thất bại'
-            ]);
-        }
-    }
-    public function updateCCCD(Request $request)
-    {
-        if (Session::has('loginUsernamePay')) {
-            if (!$request->detail_CCCD) {
-                $request->detail_CCCD = "";
-            }
-            $affected = DB::table('users')
-                ->where('username', Session::get('loginUsernamePay'))
-                ->update(['CCCD' => $request->detail_CCCD]);
-            if ($affected) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'success'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Nhập CCCD muốn thay đổi của bạn'
-                ]);
-            }
-        } else {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Cập nhật thất bại'
-            ]);
-        }
-    }
-
     public function logout()
     {
         if (Session::has('loginUsernamePay')) {
@@ -463,7 +424,7 @@ class WebPayController extends Controller
                         "status" => 400,
                         'message_code' => "Có lỗi gì đó trong việc kết nối đến hệ thống server"
                     ]);
-                    
+
                 } else if ($result['errorCode'] != 1) {
                     $transactions = DB::table('transactions')->insert([
                         'username' => $request->usernameRq,
@@ -479,16 +440,16 @@ class WebPayController extends Controller
                         "status" => 400,
                         "message_code" => $result['message']
                     ]);
-                    
+
                 } else {
                     $amount = $request->monney_pick * 80 / 100;
-                    $user = DB::table('users')->where('username', $request->usernameRq)->first();   
+                    $user = DB::table('users')->where('username', $request->usernameRq)->first();
                     $transactions = DB::table('transactions')->insert([
                         'username' => $request->usernameRq,
                         'transactionID' => $result['request_id'],
                         'type_pay' => $request->type_pay,
                         'serial' => "",
-                        'amount' =>  $request->monney_pick,
+                        'amount' => $request->monney_pick,
                         'status' => 0,
                         'desc' => "Đang xử lý thanh toán"
                     ]);
@@ -506,10 +467,10 @@ class WebPayController extends Controller
         $rq = new RequestBanking();
         $rq->username = "VIEIAG1";
         $rq->password = "9fbonw67kd8qsavy2tge04z1jihp5xur";
-        $rq->request_id =  $this->randomtranId();
+        $rq->request_id = $this->randomtranId();
         $rq->bank_code = "ACB";
         $rq->money = $amountInput;
-        $rq->url_callback="http://ggosdk.mobi/api/recharge/success";
+        $rq->url_callback = "http://ggosdk.mobi/api/recharge/success";
         $array = (array) $rq;
         $response = Http::withHeaders([
             'Content-Type' => 'application/json'
@@ -532,69 +493,77 @@ class WebPayController extends Controller
 
     }
     public function CallBackRechargeSuccess(Request $request)
-    { 
+    {
         // $data = json_decode(json_encode($request->all()));
         $data = $request->all();
-        if($data['status']==1){
+        if ($data['status'] == 1) {
             $transaction = DB::table('transactions')->where('transactionID', $data['request_id'])->first();
-            if( $transaction){
+            if ($transaction) {
                 $data['username'] = $transaction->username;
                 Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
                 $amount = $data['amount'] * 80 / 100;
-                    $user = DB::table('users')->where('username', $transaction->username)->first();
-                    $monney = $user->balance + $amount;
-                    $affected = DB::table('users')
-                        ->where('username', $transaction->username)
-                        ->update(['balance' => $monney]);
-                    $affected2 = DB::table('transactions')
+                $user = DB::table('users')->where('username', $transaction->username)->first();
+                $monney = $user->balance + $amount;
+                $affected = DB::table('users')
+                    ->where('username', $transaction->username)
+                    ->update(['balance' => $monney]);
+                $affected2 = DB::table('transactions')
                     ->where('transactionID', $data['request_id'])
-                    ->update(['status' => 1,
-                              'desc' => "Giao dịch QR thành công",
-                              'amount'=>$data['amount']
-                            ]);
+                    ->update([
+                        'status' => 1,
+                        'desc' => "Giao dịch QR thành công",
+                        'amount' => $data['amount']
+                    ]);
             }
-        }else{
+        } else {
             $affected2 = DB::table('transactions')
-            ->where('transactionID', $data['request_id'])
-            ->update(['status' => -1,
-                      'desc' => "Giao dịch QR thất bại"]);
+                ->where('transactionID', $data['request_id'])
+                ->update([
+                    'status' => -1,
+                    'desc' => "Giao dịch QR thất bại"
+                ]);
         }
     }
 
-    public function qrCode(Request $request){
+    public function qrCode(Request $request)
+    {
         $dataList = json_decode($request->input('dataList'));
         return view('webpay/qrcode', compact('dataList'));
     }
-    public function transactionSuccess($transaction_id){
+    public function transactionSuccess($transaction_id)
+    {
         $transaction = DB::table('transactions')->where('transactionID', $transaction_id)->first();
-        if($transaction){
-            if($transaction->status==1){
+        if ($transaction) {
+            if ($transaction->status == 1) {
                 return response()->json([
                     'status' => 200,
-                    'message'=>"Thanh toán QR hoàn tất"
+                    'message' => "Thanh toán QR hoàn tất"
                 ]);
-            } else if($transaction->status==0){
+            } else if ($transaction->status == 0) {
                 return response()->json([
                     'status' => 202,
-                    'message'=>"Đang xử lý giao dịch"
+                    'message' => "Đang xử lý giao dịch"
                 ]);
-            } else{
+            } else {
                 return response()->json([
                     'status' => 400,
-                    'message'=>"Giao QR dịch thất bại"
+                    'message' => "Giao QR dịch thất bại"
                 ]);
             }
         }
     }
-    public function timeouts($transaction_id){
+    public function timeouts($transaction_id)
+    {
         $affected = DB::table('transactions')
-                    ->where('transactionID', $transaction_id)
-                    ->update(['status' => -1,
-                              'desc' => "Giao QR dịch thất bại"]);
-        if($affected){
+            ->where('transactionID', $transaction_id)
+            ->update([
+                'status' => -1,
+                'desc' => "Giao QR dịch thất bại"
+            ]);
+        if ($affected) {
             return response()->json([
                 'status' => 200,
-                'message'=>"Hết thời gian - Giao dịch QR thất bại"
+                'message' => "Hết thời gian - Giao dịch QR thất bại"
             ]);
         }
     }

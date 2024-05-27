@@ -5,17 +5,55 @@
 @section('link')
 @endsection
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
+@section('loginUsername')
+    {{ Session::get('loginUsernamePay') }}
+@endsection
 @section('content')
-    <div class="container">
-      <div class="history-page text-center row d-flex justify-content-center align-items-center">
-        <div  class="col-md-4">
-          <h2>LỊCH SỬ</h2>
-          <div class="d-flex justify-content-between">
-            <a href="{{ route('transactionWallet') }}" style="background-color: rgb(203, 203, 249); color: black"
-            class="p-4">Lịch sử nạp ví</a>
-            <a href="{{ route('transactionGame') }}" style="background-color: rgb(251, 213, 213); color: black" class="p-4">Lịch sử nạp game</a>
-          </div>
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid ">
+                <div class="row d-flex justify-content-center pt-5">
+                    <div class="col-6">
+                        <div class="card">
+                            <!-- /.card-header -->
+                            <div class="card-body p-0">
+                                <table class="table table-striped text-center">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="2">LỊCH SỬ GIAO DỊCH</th>
+                                    </tr>
+                                        <tr>
+                                            <td><b>SỐ DƯ HIỆN TẠI</b></td>
+                                            <td style="color:rgb(95, 0, 172)">{{ $data->balance}} Xu</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> <a href="{{ route('transactionWallet') }}"
+                                                    class="btn btn-block btn-success btn-lg">Lịch sử nạp
+                                                    ví</a></td>
+
+                                            <td>
+                                                <a href="{{ route('transactionGame') }}"
+                                                    class="btn btn-block btn-warning btn-lg">Lịch sử
+                                                    nạp
+                                                    game</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
         </div>
-      </div>
+        <!-- /.content -->
     </div>
+@endsection
+@section('script')
+    <script></script>
 @endsection

@@ -3,17 +3,20 @@
     Dasboard
 @endsection
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
+@section('loginUsername')
+    {{ Session::get('loginUsernamePay') }}
+@endsection
 @section('content')
     <div class="content-wrapper">
         <section class="content">
             <div class="container-fluid">
-                <div class="rowrow d-flex justify-content-center align-items-center">
-                    <div class="col-md-4 mt-5">
+                <div class="row pt-2 d-flex justify-content-center ">
+                    <div class="col-4">
                         <div class="card card-primary card-outline">
                             <div class="card-body box-profile">
                               <div class="text-center">
                                 <img class="profile-user-img img-fluid img-circle"
-                                     src="{{ asset('assets\clients\image\hinh-anh-cute-anime-001.jpg') }}"
+                                     src="{{ asset('assets\clients\image\mong-giang-ho-sap-ra-mat-game-thu-viet-chinh-la-dai-vo-hiep-vat-ngu.webp') }}"
                                      alt="User profile picture">
                               </div>
                               <p class="text-muted text-center">Thông Tin Tài Khoản</p>
@@ -35,14 +38,11 @@
                                 <a href="{{ route('recharge') }}" class="btn btn-primary btn-block"><b>Nạp Ví</b></a>
                                 <a href="#" class="btn btn-primary btn-block"><b>Nạp Game</b></a>
                             </div>
-            
                             <!-- /.card-body -->
                           </div>
                     </div>
+                    
                 </div>
-
-
-             
             </div>
         </section>
     </div>

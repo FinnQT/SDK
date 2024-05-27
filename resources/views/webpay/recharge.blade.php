@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="{{ asset('assets\clients\loader.css') }}">
 @endsection
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
+@section('loginUsername')
+    {{ Session::get('loginUsernamePay') }}
+@endsection
 @section('content')
     <div class="content-wrapper">
         <!-- Main content -->
@@ -15,7 +18,7 @@
                     <div class="col-md-6 mt-5">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Đổi Thẻ cào - Nạp bằng QR code</h3>
+                                <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>ĐỔI THẺ CÀO - NẠP QR</b></h3>
                             </div>
                             <form action="" method="POST" id="form-card">
                                 <input type="hidden" name="usernameRq" value="{{ $data->username }}" id="hiddenField">

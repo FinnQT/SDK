@@ -52,9 +52,9 @@ Route::prefix('webpay')->group( function(){
   Route::get('/exchange_rate',[WebPayController::class,'exchange_rate'])->name('exchange_rate')->middleware('isLoggedInPay');  
 
   //update info user
-  Route::post('/account/updateName',[WebPayController::class,'updateName'])->name('update.Name');
-  Route::post('/account/updateLocation',[WebPayController::class,'updateLocation'])->name('update.Location');
-  Route::post('/account/updateCCCD',[WebPayController::class,'updateCCCD'])->name('update.CCCD');
+  Route::post('/account',[WebPayController::class,'updateInfo'])->name('updateInfo');
+
+
 
   //generate qr code
   Route::get('/recharge/qrcode',[WebPayController::class,'qrCode'])->name('qrcode');
