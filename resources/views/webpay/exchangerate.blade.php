@@ -13,7 +13,7 @@
         <div class="content">
             <div class="container-fluid ">
                 <div class="row">
-                    <div class="col-12 mt-3">
+                    <div class="col-md-12 mt-3">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>TỈ GIÁ NẠP - CÀO THẺ</b></h3>

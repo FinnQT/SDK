@@ -11,7 +11,7 @@
         <section class="content">
             <div class="container-fluid">
                 <div class="row pt-2 d-flex justify-content-center ">
-                    <div class="col-4">
+                    <div class="col-md-4">
                         <div class="card card-primary card-outline">
                             <div class="card-body box-profile">
                               <div class="text-center">

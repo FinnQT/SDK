@@ -14,7 +14,7 @@
         <div class="content">
             <div class="container-fluid ">
                 <div class="row d-flex justify-content-center pt-5">
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>THÔNG TIN CÁ NHÂN</b></h3>

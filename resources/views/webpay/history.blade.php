@@ -14,7 +14,7 @@
         <div class="content">
             <div class="container-fluid ">
                 <div class="row d-flex justify-content-center pt-5">
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <div class="card">
                             <!-- /.card-header -->
                             <div class="card-body p-0">
