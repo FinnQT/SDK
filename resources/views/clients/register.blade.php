@@ -134,6 +134,12 @@
                     dataType: 'json',
                     success: function(res) {
                         if (res.status == 200) {
+                            $('#username-error').empty();
+                            $('#password-error').empty();
+                            $('#cpassword-error').empty();
+                            $('#protect_code-error').empty();
+                            $('#email-error').empty();
+
                             openSuccessPopup();
                             $('#messages-fail').css('display', 'none');
                         } else {

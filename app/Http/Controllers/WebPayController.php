@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\XMLSerializer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use nusoap_client;
 
 
@@ -566,5 +569,67 @@ class WebPayController extends Controller
                 'message' => "Hết thời gian - Giao dịch QR thất bại"
             ]);
         }
+    }
+
+    
+    public function forgotprotectcode_WP(){
+        return view('webpay/forgot_protect_code_wp');
+    }
+    public function forgotprotectcodePost_WP(Request $request){
+
+        $request->validate([
+            'email'=>'required|email|exists:users'
+        ],[
+            'email.required'=>'Vui lòng nhập email',
+            'email.email'=>'email không hợp lệ',
+            'email.exists'=>'Email không tồn tại',
+        ]);
+        $token = Str::random(64);
+        DB::table('password_resets')->insert([
+            'email'=>$request->email,
+            'token'=> $token,           
+            'created_at'=> Carbon::now()
+        ]);
+        Mail::send("webpay.forgot_protect_code_email_wp", ['token'=>$token], function($message) use ($request){
+            $message->to($request->email);
+            $message->subject("Reset Protect Code");
+        });
+        return redirect()->to(route('forgotprotectcode_WP'))->with("success","Chúng tôi đã gửi link reset đến email của bạn");
+    }
+
+    public function resetprotectcode_WP($token){
+        return view('webpay/newprotectcode_wp',compact('token'));
+    }
+    public function resetprotectcodePost_WP(Request $request){
+
+        $request->validate([
+            'email'=>'required|email|exists:users',
+            'protect_code'=>'required|min:6|max:12|regex:/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]+$/',
+            'cprotect_code'=>'required|same:protect_code'
+        ],[
+            'email.required'=>'Vui lòng nhập email',
+            'email.email'=>'email không hợp lệ',
+            'email.exists'=>'Email không tồn tại',
+            'protect_code.required'=>'Vui lòng nhập mật khẩu',
+            'protect_code.min'=>'Mật khẩu chứa tối thiểu 6 kí tự',
+            'protect_code.max'=>'Mật khẩu chứa tối đa 12 kí tự',
+            'protect_code.regex'=>'Mật khẩu phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
+            'cprotect_code.required'=>'Vui lòng nhập lại mật khẩu',
+            'cprotect_code.same'=>'Mật khẩu không trùng khớp',
+        ]);
+        $updateProtectCode = DB::table('password_resets')
+        ->where([
+            'email'=> $request->email,
+            'token'=> $request->token,
+        ])->first();
+
+        if(!$updateProtectCode){
+            return redirect()->to(route('forgotprotectcodeWP'))->with('error',"Xác thực không chính xác");
+        }
+        $user = DB::table('users')->where('email', $request->email)->update([
+            'protect_code'=>Hash::make($request->protect_code)
+        ]);
+        DB::table('password_resets')->where(["email"=> $request->email])->delete();
+        return redirect()->to(route('account'))->with("success", "Thay đổi mã bảo vệ thành công");
     }
 }

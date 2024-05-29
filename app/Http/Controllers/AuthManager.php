@@ -9,7 +9,9 @@ use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 class AuthManager extends Controller
 {
     public function login(){
@@ -64,7 +66,7 @@ class AuthManager extends Controller
             'cpassword.required'=>'Vui lòng nhập lại mật khẩu',
             'cpassword.same'=>'Mật khẩu không trùng khớp',
             'email.required'=>'Vui lòng nhập email',
-            'email.email'=>'email đã được sử dụng',
+            'email.email'=>'Email không hợp lệ',
             'email.unique'=>'Email đã tồn tại',
             'protect_code.required'=>'Vui lòng nhập mã bảo vệ',
             'protect_code.min'=>'Mã bảo vệ chứa tối thiểu 6 kí tự',
@@ -84,7 +86,7 @@ class AuthManager extends Controller
             $username=$request->username;
             $email=$request->email;
             $password=Hash::make($request->password);
-            $protect_code=$request->protect_code;
+            $protect_code=Hash::make($request->protect_code);
             $uuid= (string) Uuid::uuid4();
             $created_at = now(); 
             
@@ -150,9 +152,9 @@ class AuthManager extends Controller
 
             $user = DB::table('users')->where('username', $request->username)->first();
             if($user){
-                if($request->protect_code==$user->protect_code){
+                
+                if(Hash::check($request->protect_code,$user->protect_code)){
                     $username=$user->username;
-                    
                     return response()->json([
                         'username'=>$username,
                         'status'=>200,
@@ -210,5 +212,66 @@ class AuthManager extends Controller
                 ]);
             }
         }
+    }
+
+    public function forgotprotectcode(){
+        return view('clients/forgot_protect_code');
+    }
+    public function forgotprotectcodePost(Request $request){
+
+        $request->validate([
+            'email'=>'required|email|exists:users'
+        ],[
+            'email.required'=>'Vui lòng nhập email',
+            'email.email'=>'email không hợp lệ',
+            'email.exists'=>'Email không tồn tại',
+        ]);
+        $token = Str::random(64);
+        DB::table('password_resets')->insert([
+            'email'=>$request->email,
+            'token'=> $token,           
+            'created_at'=> Carbon::now()
+        ]);
+        Mail::send("clients.forgot_protect_code_email", ['token'=>$token], function($message) use ($request){
+            $message->to($request->email);
+            $message->subject("Reset Protect Code");
+        });
+        return redirect()->to(route('forgotprotectcode'))->with("success","Chúng tôi đã gửi link reset đến email của bạn");
+    }
+
+    public function resetprotectcode($token){
+        return view('clients/newprotectcode',compact('token'));
+    }
+    public function resetprotectcodePost(Request $request){
+
+        $request->validate([
+            'email'=>'required|email|exists:users',
+            'protect_code'=>'required|min:6|max:12|regex:/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]+$/',
+            'cprotect_code'=>'required|same:protect_code'
+        ],[
+            'email.required'=>'Vui lòng nhập email',
+            'email.email'=>'email không hợp lệ',
+            'email.exists'=>'Email không tồn tại',
+            'protect_code.required'=>'Vui lòng nhập mật khẩu',
+            'protect_code.min'=>'Mật khẩu chứa tối thiểu 6 kí tự',
+            'protect_code.max'=>'Mật khẩu chứa tối đa 12 kí tự',
+            'protect_code.regex'=>'Mật khẩu phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
+            'cprotect_code.required'=>'Vui lòng nhập lại mật khẩu',
+            'cprotect_code.same'=>'Mật khẩu không trùng khớp',
+        ]);
+        $updateProtectCode = DB::table('password_resets')
+        ->where([
+            'email'=> $request->email,
+            'token'=> $request->token,
+        ])->first();
+
+        if(!$updateProtectCode){
+            return redirect()->to(route('forgotprotectcode'))->with('error',"Xác thực không chính xác");
+        }
+        $user = DB::table('users')->where('email', $request->email)->update([
+            'protect_code'=>Hash::make($request->protect_code)
+        ]);
+        DB::table('password_resets')->where(["email"=> $request->email])->delete();
+        return redirect()->to(route('login'))->with("success", "Thay đổi mã bảo vệ thành công");
     }
 }

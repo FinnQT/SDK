@@ -77,8 +77,12 @@
             </form>
         </div>
         <p class="text-center">
+            <a href="{{ route('forgotprotectcode') }}"><b>Quên mã bảo vệ</b></a>
+        </p>
+        <p class="text-center">
             <a href="{{ route('login') }}"><b>Quay lại</b></a>
         </p>
+ 
     </div>
 
     </div>

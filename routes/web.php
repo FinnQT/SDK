@@ -30,10 +30,18 @@ Route::prefix('clients')->group( function(){
   Route::post('/register',[AuthManager::class,'registerPost'])->name('register.post');
   Route::get('/logout',[AuthManager::class,'logout'])->name('logout');
   Route::get('/dashboard',[AuthManager::class,'dashboard'])->name('dashboard')->middleware('isLoggedIn');
+
+  //change password
   Route::get('/forgot',[AuthManager::class,'forgot'])->name('forgot')->middleware('alreadyLoggedIn');
   Route::post('/forgot/validate',[AuthManager::class,'forgotPostTest'])->name('forgot.validate');
   Route::post('/forgot/newpass',[AuthManager::class,'forgotPostNewPassword'])->name('forgot.newpass');
- 
+
+  //change protect code
+  Route::get('/forgotprotectcode',[AuthManager::class,'forgotprotectcode'])->name('forgotprotectcode');
+  Route::post('/forgotprotectcode',[AuthManager::class,'forgotprotectcodePost'])->name('forgotprotectcode.post');
+  Route::get('/resetprotectcode/{token}',[AuthManager::class,'resetprotectcode'])->name('resetprotectcode');
+  Route::post('/resetprotectcode',[AuthManager::class,'resetprotectcodePost'])->name('resetprotectcode.post');
+
 });
 
 
@@ -50,20 +58,18 @@ Route::prefix('webpay')->group( function(){
   Route::get('/account',[WebPayController::class,'account'])->name('account')->middleware('isLoggedInPay');  
   // exchange rate
   Route::get('/exchange_rate',[WebPayController::class,'exchange_rate'])->name('exchange_rate')->middleware('isLoggedInPay');  
-
   //update info user
   Route::post('/account',[WebPayController::class,'updateInfo'])->name('updateInfo');
-
-
-
   //generate qr code
   Route::get('/recharge/qrcode',[WebPayController::class,'qrCode'])->name('qrcode');
-  
   // execute recharge
   Route::get('/recharge/transactionSuccess/{id}',[WebPayController::class,'transactionSuccess'])->name('transactionSuccess');
   Route::get('/recharge/timeouts/{id}',[WebPayController::class,'timeouts'])->name('timeouts');
 
-
+  Route::get('/forgotprotectcode_WP',[WebPayController::class,'forgotprotectcode_WP'])->name('forgotprotectcode_WP');
+  Route::post('/forgotprotectcode_WP',[WebPayController::class,'forgotprotectcodePost_WP'])->name('forgotprotectcode_WP.post');
+  Route::get('/resetprotectcode_WP/{token}',[WebPayController::class,'resetprotectcode_WP'])->name('resetprotectcodeWP');
+  Route::post('/resetprotectcode_WP',[WebPayController::class,'resetprotectcodePost_WP'])->name('resetprotectcode_WP.post');
 
 
   // history

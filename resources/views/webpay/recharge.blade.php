@@ -202,7 +202,7 @@
                                     <div class="card-body p-0">
                                         <table class="table">
                                             <tr>
-                                                <th id="error_details" class="text-center">Than toán thẻ thành công - quay lại ví</th>
+                                                <th id="error_details" class="text-center">Thanh toán thẻ thành công - quay lại ví</th>
                                             </tr>
                                         </table>
                                     </div>

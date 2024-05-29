@@ -38,10 +38,10 @@
                                         </tr>
                                         <tr>
                                             <th>MÃ BẢO VỆ</th>
-                                            <td><input class="form-control" type="text" value="{{ $data->protect_code }}"
+                                            <td><input class="form-control" type="text" value="************"
                                                     disabled></td>
                                             <td>
-                                                <button type="button" class="btn btn-block btn-success">Cập Nhật</button>
+                                                <a href="{{ route('forgotprotectcode_WP') }}" class="btn btn-block btn-success">Cập Nhật</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -151,6 +151,10 @@
         }
 
         $(function() {
+            @if (session('success'))
+                var message = '{{ session('success') }}';
+                alert(message);
+            @endif
             $("#form-updateInfo").submit(function(e) {
                 closeBox();
                 e.preventDefault();
