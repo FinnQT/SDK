@@ -31,6 +31,11 @@ Route::prefix('clients')->group( function(){
   Route::get('/logout',[AuthManager::class,'logout'])->name('logout');
   Route::get('/dashboard',[AuthManager::class,'dashboard'])->name('dashboard')->middleware('isLoggedIn');
 
+  Route::get('/registerTestAcc',[AuthManager::class,'registerTestAcc'])->name('registerTestAcc');
+  Route::get('/linkAccount/{uuid}',[AuthManager::class,'linkAccount'])->name('linkAccount');
+  Route::post('/linkAccount',[AuthManager::class,'linkAccountPost'])->name('linkAccountPost');
+
+
   //change password
   Route::get('/forgot',[AuthManager::class,'forgot'])->name('forgot')->middleware('alreadyLoggedIn');
   Route::post('/forgot/validate',[AuthManager::class,'forgotPostTest'])->name('forgot.validate');

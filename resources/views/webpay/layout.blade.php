@@ -16,6 +16,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('template/dist/css/adminlte.min.css') }}">
     @yield('link')
+    @yield('style')
 </head>
 
 <body class="@yield('body-class', '')">

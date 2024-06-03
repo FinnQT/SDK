@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <p class="mb-1 text-center">
-                    <a href="" ><b>Chơi Ngay</b></a>
+                    <a href="{{ route("registerTestAcc") }}" ><b>Chơi Ngay</b></a>
                 </p>
             </div>
         </div>

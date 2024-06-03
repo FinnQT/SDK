@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{ asset('template/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('template/dist/css/adminlte.min.css') }}">
+    @yield('style')
     @yield('link')
 </head>
 <body class="@yield('body-class', '')">

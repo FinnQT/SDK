@@ -136,6 +136,7 @@ class WebPayController extends Controller
     {
         if (Session::has('loginUsernamePay')) {
             Session::pull('loginUsernamePay');
+            
             return redirect()->route('loginPay');
         } else {
             return redirect()->route('loginPay');
@@ -610,12 +611,12 @@ class WebPayController extends Controller
             'email.required'=>'Vui lòng nhập email',
             'email.email'=>'email không hợp lệ',
             'email.exists'=>'Email không tồn tại',
-            'protect_code.required'=>'Vui lòng nhập mật khẩu',
-            'protect_code.min'=>'Mật khẩu chứa tối thiểu 6 kí tự',
-            'protect_code.max'=>'Mật khẩu chứa tối đa 12 kí tự',
-            'protect_code.regex'=>'Mật khẩu phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
-            'cprotect_code.required'=>'Vui lòng nhập lại mật khẩu',
-            'cprotect_code.same'=>'Mật khẩu không trùng khớp',
+            'protect_code.required'=>'Vui lòng nhập mã bảo vệ',
+            'protect_code.min'=>'Mã bảo vệ chứa tối thiểu 6 kí tự',
+            'protect_code.max'=>'Mã bảo vệ chứa tối đa 12 kí tự',
+            'protect_code.regex'=>'Mã bảo vệ phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
+            'cprotect_code.required'=>'Vui lòng nhập lại mã bảo vệ',
+            'cprotect_code.same'=>'Mã bảo vệ không trùng khớp',
         ]);
         $updateProtectCode = DB::table('password_resets')
         ->where([
