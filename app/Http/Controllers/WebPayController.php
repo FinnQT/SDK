@@ -42,12 +42,14 @@ class WebPayController extends Controller
             if (Hash::check($request->password, $user->password)) {
                 if ($user->is_admin == 1) {
                     $request->session()->put('admin', $user->username);
+                    Session::pull('loginUsernamePay');
                     return redirect()->route('admin');
                 } else {
                     if ($user->status == 0) {
                         return back()->with('fail', 'Tài khoản đã bị cấm');
                     } else {
                         $request->session()->put('loginUsernamePay', $user->username);
+                        Session::pull('admin');
                         return redirect()->route('dashboardPay');
                     }
                 }
