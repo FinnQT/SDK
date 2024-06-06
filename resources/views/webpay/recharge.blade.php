@@ -1,6 +1,6 @@
 @extends('webpay/layout')
 @section('title')
-    recharge
+    Recharge
 @endsection
 @section('link')
     <link rel="stylesheet" href="{{ asset('assets\clients\loader.css') }}">

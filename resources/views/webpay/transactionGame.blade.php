@@ -1,6 +1,6 @@
 @extends('webpay/layout')
 @section('title')
-    Login
+    Transaction Game
 @endsection
 @section('link')
 @endsection

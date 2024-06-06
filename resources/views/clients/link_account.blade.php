@@ -1,6 +1,6 @@
-@extends('layout')
+@extends('clients/layout')
 @section('title')
-    Register
+    Link Account
 @endsection
 @section('link')
 @endsection

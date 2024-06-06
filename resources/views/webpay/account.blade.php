@@ -1,6 +1,6 @@
 @extends('webpay/layout')
 @section('title')
-    Login
+    Account
 @endsection
 @section('link')
 @endsection

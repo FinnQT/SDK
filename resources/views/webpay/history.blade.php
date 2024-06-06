@@ -1,6 +1,6 @@
 @extends('webpay/layout')
 @section('title')
-    Login
+    History Pay
 @endsection
 @section('link')
 @endsection

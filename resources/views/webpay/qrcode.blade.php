@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title')
-    Dasboard
+    QR code
 @endsection
 @section('link')
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -12,6 +12,7 @@
                 <div class="text-center">
                     <h3>NẠP THẺ QR</h2>
                         <div id="countdown" style="color:red;"></div>
+                        <div style="color:red;">Thoát giao dịch - Hủy giao dịch</div>
                 </div>
                 <img src="{{ $dataList !== null ? $dataList->redirectLink : '' }}" alt="" class="img-fluid">
                 <table class="table ">

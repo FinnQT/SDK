@@ -1,6 +1,6 @@
-@extends('webpay/layout')
+@extends('admin/layout')
 @section('title')
-    Transaction Wallet
+    History
 @endsection
 @section('link')
 @endsection
@@ -16,7 +16,7 @@
                     <div class="col-md-10 mt-5">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>LỊCH SỬ NẠP VÍ -  30 GIAO DỊCH GẦN NHẤT</b></h3>
+                                <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>LỊCH SỬ NẠP CỦA USER</b></h3>
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body table-responsive p-0" style="height: 400px;">
@@ -24,6 +24,7 @@
                                     <thead>
                                         <tr>
                                             <th>STT</th>
+                                            <th>UserName</th>
                                             <th>Mã GD</th>
                                             <th>Loại</th>
                                             <th>Serial</th>
@@ -37,6 +38,7 @@
                                         @foreach ($transaction as $index => $transaction)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
+                                                <td>{{ $transaction->username}}</td>
                                                 <td>{{ $transaction->transactionID }}</td>
                                                 <td>{{ $transaction->type_pay }}</td>
                                                 <td>{{ $transaction->serial }}</td>

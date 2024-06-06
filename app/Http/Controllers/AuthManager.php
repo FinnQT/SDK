@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -27,8 +28,6 @@ class AuthManager extends Controller
 
     public function loginPost(Request $request)
     {
-
-
         $request->validate([
             'username' => 'required',
             'password' => 'required'
@@ -37,10 +36,18 @@ class AuthManager extends Controller
             'password.required' => 'Vui lòng nhập mật khẩu',
         ]);
 
-        $user = DB::table('users')->where('username', $request->username)->first();
+        $user = User::where('username', $request->username)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $request->session()->put('loginUsername', $user->username);
+                if ($user->status == 0) {
+                    return back()->with('fail', 'Tài khoản đã bị cấm');
+                } else {
+                    $request->session()->put('loginUsername', $user->username);
+                    $ipAddress = $request->ip();
+                    $user = User::where('username', $user->username)->update([
+                        'last_login_ip' => $ipAddress
+                    ]);
+                }
                 return redirect()->route('dashboard');
             } else {
                 return back()->with('fail', 'Mật khẩu không chính xác');
@@ -49,7 +56,6 @@ class AuthManager extends Controller
             return back()->with('fail', 'Tài khoản không tồn tại!');
         }
     }
-
     public function registerPost(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -87,25 +93,24 @@ class AuthManager extends Controller
                 'message' => $validator->getMessageBag()
             ]);
         } else {
-
             $username = $request->username;
             $email = $request->email;
             $password = Hash::make($request->password);
             $protect_code = Hash::make($request->protect_code);
             $uuid = (string) Uuid::uuid4();
-            $created_at = now();
-
-            $res = DB::table('users')->insert([
+            $ipAddress = $request->ip();
+            $user = User::create([
                 'uuid' => $uuid,
                 'username' => $username,
                 'email' => $email,
                 'password' => $password,
                 'protect_code' => $protect_code,
-                'created_at' => $created_at,
                 'status' => 1,
-                'link' => 1
+                'link' => 1,
+                'ip_address' => $ipAddress,
+                'last_login_ip' => $ipAddress
             ]);
-            if ($res) {
+            if ($user) {
                 // return back()->with('success','Bạn đăng ký thành công');
                 return response()->json([
                     'status' => 200,
@@ -126,7 +131,7 @@ class AuthManager extends Controller
         $usernameTest = "";
         while ($exists) {
             $usernameTest = "Test" . rand(1, 100000000000); // Sinh một ID ngẫu nhiên trong khoảng từ 1 đến 100000000000
-            $exists = DB::table('users')->where('username', $usernameTest)->exists(); // Kiểm tra xem ID đã tồn tại chưa
+            $exists = User::where('username', $usernameTest)->exists(); // Kiểm tra xem ID đã tồn tại chưa
         }
         return $usernameTest;
     }
@@ -134,20 +139,19 @@ class AuthManager extends Controller
     {
         $username = $this->randomtranUsername();
         $uuid = (string) Uuid::uuid4();
-        $created_at = now();
-        $res = DB::table('users')->insert([
+        $user = User::create([
             'uuid' => $uuid,
             'username' => $username,
-            'email' =>  $username,
+            'email' => $username . "@gmail.com",
             'password' => "",
             'protect_code' => "",
-            'created_at' => $created_at,
             'status' => 1,
-            'link' => 0
+            'link' => 0,
+            'ip_address' => '',
+            'last_login_ip' => ''
         ]);
-        if ($res) {
-            // return back()->with('success','Bạn đăng ký thành công');
-            Session::put('loginUsername',$username);
+        if ($user) {
+            Session::put('loginUsername', $username);
             return redirect()->route('dashboard');
         } else {
             // return back()->with('fail','Có lỗi đã xảy ra');
@@ -156,11 +160,13 @@ class AuthManager extends Controller
                 'messages' => 'Đăng ký lỗi'
             ]);
         }
-    }    
-    public function linkAccount($uuid){
+    }
+    public function linkAccount($uuid)
+    {
         return view('clients/link_account', compact('uuid'));
     }
-    public function linkAccountPost(Request $request){
+    public function linkAccountPost(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'username' => 'required|unique:users|min:6|max:12|regex:/^[a-zA-Z0-9\s]+$/',
             'password' => 'required|min:6|max:12|regex:/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]+$/',
@@ -200,17 +206,18 @@ class AuthManager extends Controller
             $password = Hash::make($request->password);
             $protect_code = Hash::make($request->protect_code);
             $uuid = $request->hidden_uuid;
-            $created_at = now();
-            $res = DB::table('users')->where('uuid',$uuid)->update([
+            $ipAddress = $request->ip();
+            $user = User::where('uuid', $uuid)->update([
                 'username' => $username,
                 'email' => $email,
                 'password' => $password,
                 'protect_code' => $protect_code,
-                'created_at' => $created_at,
                 'status' => 1,
-                'link' => 1
+                'link' => 1,
+                'ip_address' => $ipAddress,
+                'last_login_ip' => $ipAddress
             ]);
-            if ($res) {
+            if ($user) {
                 // return back()->with('success','Bạn đăng ký thành công');
                 Session::forget('loginUsername');
                 return response()->json([
@@ -226,27 +233,23 @@ class AuthManager extends Controller
             }
         }
     }
-    
-    
-    
-    
-    
+
     //go to dashboard
     public function dashboard()
     {
         $data = array();
-        if (Session::has('loginUsername')){
-            $data = DB::table('users')->where('username', Session::get('loginUsername'))->first();
+        if (Session::has('loginUsername')) {
+            $data = User::where('username', Session::get('loginUsername'))->first();
         }
         return view('clients/dashboard', compact('data'));
     }
     public function logout()
     {
         if (Session::has('loginUsername')) {
-            $data = DB::table('users')->where('username', Session::get('loginUsername'))->first();
+            $data = User::where('username', Session::get('loginUsername'))->first();
             Session::pull('loginUsername');
-            if($data->link==0){
-                DB::table('users')->where('username', $data->username)->delete();
+            if ($data->link == 0) {
+                User::where('username', $data->username)->delete();
             }
             return redirect()->route('login');
         }
@@ -275,7 +278,7 @@ class AuthManager extends Controller
             ]);
         } else {
 
-            $user = DB::table('users')->where('username', $request->username)->first();
+            $user = User::where('username', $request->username)->first();
             if ($user) {
 
                 if (Hash::check($request->protect_code, $user->protect_code)) {
@@ -323,8 +326,7 @@ class AuthManager extends Controller
             ]);
         } else {
             $password = Hash::make($request->password);
-            $affected = DB::table('users')
-                ->where('username', $request->hidden_value)
+            $affected = User::where('username', $request->hidden_value)
                 ->update(['password' => $password]);
             if ($affected) {
                 return response()->json([
@@ -398,8 +400,12 @@ class AuthManager extends Controller
         if (!$updateProtectCode) {
             return redirect()->to(route('forgotprotectcode'))->with('error', "Xác thực không chính xác");
         }
-        $user = DB::table('users')->where('email', $request->email)->update([
-            'protect_code' => Hash::make($request->protect_code)
+        $logold = User::where('email', $request->email)->value('log_protect_code');
+        $time =Carbon::now();
+        $logchange=$logold."Đã cập nhật mới protectcode: ".$time."-".$request->protect_code."|";
+        $user = User::where('email', $request->email)->update([
+            'protect_code' => Hash::make($request->protect_code),
+            'log_protect_code'=>$logchange
         ]);
         DB::table('password_resets')->where(["email" => $request->email])->delete();
         return redirect()->to(route('login'))->with("success", "Thay đổi mã bảo vệ thành công");

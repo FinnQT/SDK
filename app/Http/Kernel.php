@@ -69,5 +69,7 @@ class Kernel extends HttpKernel
         'isLoggedInPay' => \App\Http\Middleware\AuthCheckPay::class,
         'alreadyLoggedIn' => \App\Http\Middleware\AlreadyLoggedIn::class,
         'alreadyLoggedInPay' => \App\Http\Middleware\AlreadyLoggedInPay::class,
+        //is Admin
+        'is_admin'=> \App\Http\Middleware\IsAdmin::class,
     ];
 }

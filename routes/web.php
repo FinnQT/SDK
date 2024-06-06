@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthManager;
 use App\Http\Controllers\WebPayController;
+use App\Http\Controllers\AdminController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,10 +21,11 @@ Route::get('/', function () {
 Route::get('template_custome', function () {
   return view('register_layout');
 });
-Route::get('admin', function () {
-  return view('admin/admin');
-});
-Route::prefix('clients')->group( function(){
+
+
+
+
+Route::prefix('/')->group( function(){
   Route::get('/login',[AuthManager::class,'login'])->name('login')->middleware('alreadyLoggedIn');
   Route::post('/login',[AuthManager::class,'loginPost'])->name('login.post');
   Route::get('/register',[AuthManager::class,'register'])->name('register')->middleware('alreadyLoggedIn');
@@ -81,6 +83,16 @@ Route::prefix('webpay')->group( function(){
   Route::get('/history/transactionWallet',[WebPayController::class,'transactionWallet'])->name('transactionWallet')->middleware('isLoggedInPay');
   Route::get('/history/transactionGame',[WebPayController::class,'transactionGame'])->name('transactionGame')->middleware('isLoggedInPay');
 
+  Route::prefix('admin')->group( function(){
+    Route::get('/',[AdminController::class,'admin'])->name('admin')->middleware('is_admin');
+    Route::get('/logout',[AdminController::class,'logout'])->name('logoutAdmin');
+    Route::get('/managerUser',[AdminController::class,'managerUser'])->name('managerUser')->middleware('is_admin');
+    Route::post('/managerUser/update',[AdminController::class,'updateInfoUser'])->name('updateInfoUser');
+    Route::post('/managerUser/delete',[AdminController::class,'delete'])->name('delete');
+    Route::get('/historyUser',[AdminController::class,'historyUser'])->name('historyUser')->middleware('is_admin');
+    Route::get('/exchange_rate_money',[AdminController::class,'exchange_rate_money'])->name('exchange_rate_money')->middleware('is_admin');
+    Route::post('/exchange_rate_money',[AdminController::class,'exchange_rate_money_post'])->name('exchange_rate_money.post')->middleware('is_admin');
+  });
 
 
 

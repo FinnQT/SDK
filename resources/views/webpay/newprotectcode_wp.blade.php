@@ -1,6 +1,6 @@
-@extends('layout')
+@extends('clients/layout')
 @section('title')
-    Login
+    New Protect Code
 @endsection
 @section('style')
 @endsection

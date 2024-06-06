@@ -1,6 +1,6 @@
 @extends('webpay/layout')
 @section('title')
-    exchange rate
+    Exchange Rate
 @endsection
 
 @section('body-class', 'hold-transition sidebar-mini sidebar-collapse')
@@ -37,6 +37,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @if(isset($data->rate))
                                         <tr>
                                             <th>Tỉ giá</th>
                                             <td>{{ $data->rate * 100 }}%</td>
@@ -63,6 +64,7 @@
                                             <td>{{ 3000000 - $data->rate * 3000000 }} xu</td>
                                             <td>{{ 5000000 - $data->rate * 5000000 }} xu</td>
                                         </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>

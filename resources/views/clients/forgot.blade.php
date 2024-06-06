@@ -1,6 +1,6 @@
-@extends('layout')
+@extends('clients/layout')
 @section('title')
-    Login
+    Forgot Password
 @endsection
 @section('link')
     <link rel="stylesheet" href="{{ asset('assets\clients\popup.css') }}">

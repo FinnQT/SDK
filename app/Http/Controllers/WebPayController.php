@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
 
-
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -37,11 +37,20 @@ class WebPayController extends Controller
             'username.required' => 'Vui lòng nhập tên tài khoản',
             'password.required' => 'Vui lòng nhập mật khẩu',
         ]);
-        $user = DB::table('users')->where('username', $request->username)->first();
+        $user = User::where('username', $request->username)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $request->session()->put('loginUsernamePay', $user->username);
-                return redirect()->route('dashboardPay');
+                if ($user->is_admin == 1) {
+                    $request->session()->put('admin', $user->username);
+                    return redirect()->route('admin');
+                } else {
+                    if ($user->status == 0) {
+                        return back()->with('fail', 'Tài khoản đã bị cấm');
+                    } else {
+                        $request->session()->put('loginUsernamePay', $user->username);
+                        return redirect()->route('dashboardPay');
+                    }
+                }
             } else {
                 return back()->with('fail', 'Mật khẩu không chính xác');
             }
@@ -54,7 +63,7 @@ class WebPayController extends Controller
     {
         $data = array();
         if (Session::has('loginUsernamePay')) {
-            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+            $data = User::where('username', Session::get('loginUsernamePay'))->first();
         }
         return view('webpay/dashboard', compact('data'));
     }
@@ -62,7 +71,7 @@ class WebPayController extends Controller
     {
         $data = array();
         if (Session::has('loginUsernamePay')) {
-            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+            $data = User::where('username', Session::get('loginUsernamePay'))->first();
         }
         return view('webpay/history', compact('data'));
     }
@@ -81,7 +90,7 @@ class WebPayController extends Controller
     {
         $data = array();
         if (Session::has('loginUsernamePay')) {
-            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+            $data = User::where('username', Session::get('loginUsernamePay'))->first();
         }
         return view('webpay/account', compact('data'));
     }
@@ -96,12 +105,15 @@ class WebPayController extends Controller
     public function updateInfo(Request $request)
     {
         if (Session::has('loginUsernamePay')) {
-            $affected = DB::table('users')
-                ->where('username', Session::get('loginUsernamePay'))
+            $time =Carbon::now();
+            $logold = User::where('username',  Session::get('loginUsernamePay'))->value('log_change_inf');
+            $logchange=$logold."Đã cập nhật mới thông tin: ".$time."-".$request->detail_name."-".$request->detail_location."-".$request->detail_CCCD."|";
+            $affected = User::where('username', Session::get('loginUsernamePay'))
                 ->update([
                     'name' => $request->detail_name,
                     'location' => $request->detail_location,
-                    'CCCD' => $request->detail_CCCD
+                    'CCCD' => $request->detail_CCCD,
+                    'log_change_inf'=>$logchange
                 ]);
             return response()->json([
                 'status' => 200,
@@ -113,30 +125,12 @@ class WebPayController extends Controller
                 'message' => 'Cập nhật thất bại'
             ]);
         }
-
-        //     if ($affected) {
-        //         return response()->json([
-        //             'status' => 200,
-        //             'message' => 'success'
-        //         ]);
-        //     } else {
-        //         return response()->json([
-        //             'status' => 400,
-        //             'message' => 'Nhập tên muốn thay đổi của bạn'
-        //         ]);
-        //     }
-        // } else {
-        //     return response()->json([
-        //         'status' => 400,
-        //         'message' => 'Cập nhật thất bại'
-        //     ]);
-        // }
     }
     public function logout()
     {
         if (Session::has('loginUsernamePay')) {
             Session::pull('loginUsernamePay');
-            
+
             return redirect()->route('loginPay');
         } else {
             return redirect()->route('loginPay');
@@ -146,7 +140,7 @@ class WebPayController extends Controller
     {
         $data = array();
         if (Session::has('loginUsernamePay')) {
-            $data = DB::table('users')->where('username', Session::get('loginUsernamePay'))->first();
+            $data = User::where('username', Session::get('loginUsernamePay'))->first();
         }
         return view('webpay/recharge', compact('data'));
     }
@@ -365,10 +359,9 @@ class WebPayController extends Controller
                     ]);
                 } else {
                     $amount = $result['CardAmount'] * 80 / 100;
-                    $user = DB::table('users')->where('username', $request->usernameRq)->first();
+                    $user = User::where('username', $request->usernameRq)->first();
                     $monney = $user->balance + $amount;
-                    $affected = DB::table('users')
-                        ->where('username', $request->usernameRq)
+                    $affected = User::where('username', $request->usernameRq)
                         ->update(['balance' => $monney]);
 
                     $transactions = DB::table('transactions')->insert([
@@ -447,7 +440,7 @@ class WebPayController extends Controller
 
                 } else {
                     $amount = $request->monney_pick * 80 / 100;
-                    $user = DB::table('users')->where('username', $request->usernameRq)->first();
+                    $user = User::where('username', $request->usernameRq)->first();
                     $transactions = DB::table('transactions')->insert([
                         'username' => $request->usernameRq,
                         'transactionID' => $result['request_id'],
@@ -506,10 +499,9 @@ class WebPayController extends Controller
                 $data['username'] = $transaction->username;
                 Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
                 $amount = $data['amount'] * 80 / 100;
-                $user = DB::table('users')->where('username', $transaction->username)->first();
+                $user = User::where('username', $transaction->username)->first();
                 $monney = $user->balance + $amount;
-                $affected = DB::table('users')
-                    ->where('username', $transaction->username)
+                $affected = User::where('username', $transaction->username)
                     ->update(['balance' => $monney]);
                 $affected2 = DB::table('transactions')
                     ->where('transactionID', $data['request_id'])
@@ -572,65 +564,73 @@ class WebPayController extends Controller
         }
     }
 
-    
-    public function forgotprotectcode_WP(){
+
+    public function forgotprotectcode_WP()
+    {
         return view('webpay/forgot_protect_code_wp');
     }
-    public function forgotprotectcodePost_WP(Request $request){
+    public function forgotprotectcodePost_WP(Request $request)
+    {
 
         $request->validate([
-            'email'=>'required|email|exists:users'
-        ],[
-            'email.required'=>'Vui lòng nhập email',
-            'email.email'=>'email không hợp lệ',
-            'email.exists'=>'Email không tồn tại',
+            'email' => 'required|email|exists:users'
+        ], [
+            'email.required' => 'Vui lòng nhập email',
+            'email.email' => 'email không hợp lệ',
+            'email.exists' => 'Email không tồn tại',
         ]);
         $token = Str::random(64);
         DB::table('password_resets')->insert([
-            'email'=>$request->email,
-            'token'=> $token,           
-            'created_at'=> Carbon::now()
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => Carbon::now()
         ]);
-        Mail::send("webpay.forgot_protect_code_email_wp", ['token'=>$token], function($message) use ($request){
+        Mail::send("webpay.forgot_protect_code_email_wp", ['token' => $token], function ($message) use ($request) {
             $message->to($request->email);
             $message->subject("Reset Protect Code");
         });
-        return redirect()->to(route('forgotprotectcode_WP'))->with("success","Chúng tôi đã gửi link reset đến email của bạn");
+        return redirect()->to(route('forgotprotectcode_WP'))->with("success", "Chúng tôi đã gửi link reset đến email của bạn");
     }
 
-    public function resetprotectcode_WP($token){
-        return view('webpay/newprotectcode_wp',compact('token'));
+    public function resetprotectcode_WP($token)
+    {
+        return view('webpay/newprotectcode_wp', compact('token'));
     }
-    public function resetprotectcodePost_WP(Request $request){
+    public function resetprotectcodePost_WP(Request $request)
+    {
 
         $request->validate([
-            'email'=>'required|email|exists:users',
-            'protect_code'=>'required|min:6|max:12|regex:/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]+$/',
-            'cprotect_code'=>'required|same:protect_code'
-        ],[
-            'email.required'=>'Vui lòng nhập email',
-            'email.email'=>'email không hợp lệ',
-            'email.exists'=>'Email không tồn tại',
-            'protect_code.required'=>'Vui lòng nhập mã bảo vệ',
-            'protect_code.min'=>'Mã bảo vệ chứa tối thiểu 6 kí tự',
-            'protect_code.max'=>'Mã bảo vệ chứa tối đa 12 kí tự',
-            'protect_code.regex'=>'Mã bảo vệ phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
-            'cprotect_code.required'=>'Vui lòng nhập lại mã bảo vệ',
-            'cprotect_code.same'=>'Mã bảo vệ không trùng khớp',
+            'email' => 'required|email|exists:users',
+            'protect_code' => 'required|min:6|max:12|regex:/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]+$/',
+            'cprotect_code' => 'required|same:protect_code'
+        ], [
+            'email.required' => 'Vui lòng nhập email',
+            'email.email' => 'email không hợp lệ',
+            'email.exists' => 'Email không tồn tại',
+            'protect_code.required' => 'Vui lòng nhập mã bảo vệ',
+            'protect_code.min' => 'Mã bảo vệ chứa tối thiểu 6 kí tự',
+            'protect_code.max' => 'Mã bảo vệ chứa tối đa 12 kí tự',
+            'protect_code.regex' => 'Mã bảo vệ phải chứa chữ cái in hoa, không chứa ký tự đặc biệt',
+            'cprotect_code.required' => 'Vui lòng nhập lại mã bảo vệ',
+            'cprotect_code.same' => 'Mã bảo vệ không trùng khớp',
         ]);
         $updateProtectCode = DB::table('password_resets')
-        ->where([
-            'email'=> $request->email,
-            'token'=> $request->token,
-        ])->first();
+            ->where([
+                'email' => $request->email,
+                'token' => $request->token,
+            ])->first();
 
-        if(!$updateProtectCode){
-            return redirect()->to(route('forgotprotectcodeWP'))->with('error',"Xác thực không chính xác");
+        if (!$updateProtectCode) {
+            return redirect()->to(route('forgotprotectcodeWP'))->with('error', "Xác thực không chính xác");
         }
-        $user = DB::table('users')->where('email', $request->email)->update([
-            'protect_code'=>Hash::make($request->protect_code)
+        $logold = User::where('email', $request->email)->value('log_protect_code');
+        $time =Carbon::now();
+        $logchange=$logold."Đã cập nhật mới protectcode: ".$time."-".$request->protect_code."|";
+        $user = User::where('email', $request->email)->update([
+            'protect_code' => Hash::make($request->protect_code),
+            'log_protect_code'=>$logchange
         ]);
-        DB::table('password_resets')->where(["email"=> $request->email])->delete();
+        DB::table('password_resets')->where(["email" => $request->email])->delete();
         return redirect()->to(route('account'))->with("success", "Thay đổi mã bảo vệ thành công");
     }
 }
