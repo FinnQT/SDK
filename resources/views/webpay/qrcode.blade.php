@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('clients/layout')
 @section('title')
     QR code
 @endsection
