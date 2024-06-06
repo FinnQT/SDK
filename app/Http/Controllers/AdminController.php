@@ -92,7 +92,7 @@ class AdminController extends Controller
     public function historyUser()
     {
         if (Session::has('admin')) {
-            $transaction = DB::table('transactions')->where('username', Session::get('admin'))->orderBy('time', 'desc')->get();
+            $transaction = DB::table('transactions')->orderBy('time', 'desc')->get();
         }
         return view('admin/history', compact('transaction'));
     }
