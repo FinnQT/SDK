@@ -19,7 +19,7 @@ class AdminController extends Controller
     public function logout()
     {
         if (Session::has('admin')) {
-            $data = DB::table('users')->where('username', Session::get('admin'))->first();
+            $data = User::where('username', Session::get('admin'))->first();
             Session::pull('admin');
             return redirect()->route('loginPay');
         }
@@ -29,6 +29,8 @@ class AdminController extends Controller
     public function managerUser()
     {
         $user = DB::table('users')->orderBy('created_at', 'desc')->get();
+       
+
         return view('admin/manager_user', compact('user'));
     }
 
@@ -125,7 +127,9 @@ class AdminController extends Controller
             return back()->with('fail', 'Cập nhật không thành công');
         }
     }
-    public function findUser(){
-        
+    public function findUser(Request $request){
+        $username = $request->username_search;
+        $user = DB::table('users') ->where('username', 'LIKE', "%$username%")->orderBy('created_at', 'desc')->get();
+        return view('admin/manager_user', compact('user'));
     }
 }

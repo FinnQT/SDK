@@ -15,18 +15,20 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title" style="color: rgb(20, 156, 8)"><b>Quản Lý Người Chơi</b></h3>
-
                                 <div class="card-tools">
-                                    <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" name="table_search" class="form-control float-right"
-                                            placeholder="Search">
-
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-default">
-                                                <i class="fas fa-search"></i>
-                                            </button>
+                                    <form action="{{route('findUser')}}" method="GET" id="form-search">
+                                        @csrf
+                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                            <input type="text" name="username_search" class="form-control float-right"
+                                                placeholder="Search">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </form>
+
                                 </div>
                             </div>
                             <!-- /.card-header -->
@@ -52,8 +54,6 @@
                                             <th>Ip Đăng Nhập Gần Nhất</th>
                                             <th>Log Đổi Thông Tin</th>
                                             <th>Log Đổi Mã Bảo vệ</th>
-
-
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -83,12 +83,14 @@
                                                 <td>{{ $user->ip_address }}</td>
                                                 <td>{{ $user->last_login_ip }}</td>
                                                 <td>
-                                                    <button type="button" onclick="openBoxLog({{ json_encode($user->log_change_inf ?? '') }})" class="btn btn-success"><i
-                                                            class="fas fa-eye"></i></button>
+                                                    <button type="button"
+                                                        onclick="openBoxLog({{ json_encode($user->log_change_inf ?? '') }})"
+                                                        class="btn btn-success"><i class="fas fa-eye"></i></button>
                                                 </td>
                                                 <td>
-                                                    <button type="button" onclick="openBoxLog({{ json_encode($user->log_protect_code ?? '') }})" class="btn btn-success"><i
-                                                            class="fas fa-eye"></i></button>
+                                                    <button type="button"
+                                                        onclick="openBoxLog({{ json_encode($user->log_protect_code ?? '') }})"
+                                                        class="btn btn-success"><i class="fas fa-eye"></i></button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -193,7 +195,8 @@
                             </div>
                             <form action="" method="POST" id="form-delete">
                                 @csrf
-                                <input type="hidden" name="hidden_username_dl" value="Hidden Value" id="hidden_username_dl">
+                                <input type="hidden" name="hidden_username_dl" value="Hidden Value"
+                                    id="hidden_username_dl">
                                 <div class="modal-body">
                                     <div class="card">
                                         <!-- /.card-header -->
@@ -270,7 +273,7 @@
         function openBoxLog(logcontent) {
             const parts = logcontent.split('|');
             const result = parts.join('<br>');
-            document.getElementById("content_log").innerHTML= result;
+            document.getElementById("content_log").innerHTML = result;
             $('#popup_log').modal('show');
         }
 
@@ -332,6 +335,30 @@
                     }
                 });
             });
+            // $("#form-search").submit(function(e) {
+            //     e.preventDefault();
+            //     var formData = $('#form-search').serialize();
+            //     $.ajax({
+            //         url: "",
+            //         method: "POST",
+            //         data: formData,
+            //         dataType: 'json',
+            //         success: function(res) {
+            //             if (res.status == 200) {
+            //                 closeDeleteBox();
+            //                 setTimeout(function() {
+            //                     alert(res.message);
+            //                     window.location.reload()
+            //                 }, 300);
+            //             } else {
+            //                 closeDeleteBox();
+            //                 setTimeout(function() {
+            //                     alert(res.message);
+            //                 }, 300);
+            //             }
+            //         }
+            //     });
+            // });
         });
     </script>
 @endsection
