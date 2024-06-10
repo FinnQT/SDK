@@ -93,8 +93,6 @@ Route::prefix('webpay')->group( function(){
     Route::get('/exchange_rate_money',[AdminController::class,'exchange_rate_money'])->name('exchange_rate_money')->middleware('is_admin');
     Route::post('/exchange_rate_money',[AdminController::class,'exchange_rate_money_post'])->name('exchange_rate_money.post')->middleware('is_admin');
   });
-
-
-
+  Route::get('/findUser',[AdminController::class,'findUser'])->name('findUser')->middleware('is_admin');
 });
 

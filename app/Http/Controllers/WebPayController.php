@@ -360,7 +360,8 @@ class WebPayController extends Controller
                         "message_code" => $result['Description']
                     ]);
                 } else {
-                    $amount = $result['CardAmount'] * 80 / 100;
+                    $rate=DB::table('exchange_rate')->value('rate');
+                    $amount = $result['CardAmount'] *  (1-$rate);
                     $user = User::where('username', $request->usernameRq)->first();
                     $monney = $user->balance + $amount;
                     $affected = User::where('username', $request->usernameRq)
@@ -500,7 +501,8 @@ class WebPayController extends Controller
             if ($transaction) {
                 $data['username'] = $transaction->username;
                 Log::info('Received POST Request:', $data);  // Log dữ liệu vào Laravel log file
-                $amount = $data['amount'] * 80 / 100;
+                $rate=DB::table('exchange_rate')->value('rate');
+                $amount = $data['amount']  *  (1-$rate);
                 $user = User::where('username', $transaction->username)->first();
                 $monney = $user->balance + $amount;
                 $affected = User::where('username', $transaction->username)

@@ -125,4 +125,7 @@ class AdminController extends Controller
             return back()->with('fail', 'Cập nhật không thành công');
         }
     }
+    public function findUser(){
+        
+    }
 }
