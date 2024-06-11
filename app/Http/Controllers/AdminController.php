@@ -29,7 +29,7 @@ class AdminController extends Controller
     public function managerUser()
     {
         $user = DB::table('users')->orderBy('created_at', 'desc')->get();
-       
+
 
         return view('admin/manager_user', compact('user'));
     }
@@ -78,6 +78,8 @@ class AdminController extends Controller
     {
         $affected = User::where('username', $request->hidden_username_dl)
             ->delete();
+        $affected2 =  DB::table('transactions')->where('username', $request->hidden_username_dl)
+            ->delete();
         if ($affected) {
             return response()->json([
                 'status' => 200,
@@ -118,18 +120,19 @@ class AdminController extends Controller
             'exchange_rate.numeric' => 'Phần trăm phải là số'
         ]);
         $newRate = $request->exchange_rate / 100;
-        $affected=DB::table('exchange_rate')->update([
+        $affected = DB::table('exchange_rate')->update([
             'rate' => $newRate,
         ]);
-        if($affected){
+        if ($affected) {
             return back()->with('success', 'Cập nhật thành công');
-        }else {
+        } else {
             return back()->with('fail', 'Cập nhật không thành công');
         }
     }
-    public function findUser(Request $request){
+    public function findUser(Request $request)
+    {
         $username = $request->username_search;
-        $user = DB::table('users') ->where('username', 'LIKE', "%$username%")->orderBy('created_at', 'desc')->get();
+        $user = DB::table('users')->where('username', 'LIKE', "%$username%")->orderBy('created_at', 'desc')->get();
         return view('admin/manager_user', compact('user'));
     }
 }
